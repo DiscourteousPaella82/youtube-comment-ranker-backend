@@ -3,50 +3,54 @@ package comment;
 import java.io.IOException;
 import java.util.List;
 
-
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
-
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.CommentSnippet;
 import com.google.api.services.youtube.model.CommentThreadListResponse;
 
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class CommentClient {
 
-    private static final String DEVELOPER_KEY = System.getenv("APIKEY");
-    private static final String APPLICATION_NAME = "COMMENT FETCH APP";
-    private static final GsonFactory GSON_FACTORY 
-        = GsonFactory.getDefaultInstance();
+    private static final String DEVELOPER_KEY = System.getenv("YOUTUBEDATAV3APIKEY");
+    private String videoId;
+    private YouTube youTube;
 
-    public static YouTube getService() throws GeneralSecurityException, IOException {
-
-        final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-
-        return new YouTube.Builder(httpTransport, GSON_FACTORY, null)
-            .setApplicationName(APPLICATION_NAME)
-            .build();
+    public CommentClient(YouTube youTube){
+        this.youTube = youTube;
     }
 
-    public List<CommentThreadData> findCommentThreadByVideoId()
-        throws GeneralSecurityException, IOException {
-        YouTube youtubeService = getService();
+    public List<CommentThreadData> findCommentThreadByVideoId(String videoId)
+        throws IOException {
+        this.videoId = videoId;
+        System.out.println("Attempting to get comment thread data for video with id: " + videoId);
+        YouTube youTubeService = youTube;
 
         List<String> part = new ArrayList<>();
         part.add("snippet");
         part.add("replies");
 
-        YouTube.CommentThreads.List request = youtubeService.commentThreads()
+        YouTube.CommentThreads.List request = youTubeService.commentThreads()
             .list(part);
 
         CommentThreadListResponse response = request.setKey(DEVELOPER_KEY)
             .setMaxResults(100L)
             .setOrder("relevance")
-            .setVideoId("PziYflu8cB8")
+            .setVideoId(videoId)
+            .setFields("items.snippet.videoId,"
+                + "items.snippet.topLevelComment.snippet.likeCount,"
+                + "items.snippet.topLevelComment.snippet.publishedAt,"
+                + "items.snippet.topLevelComment.snippet.authorDisplayName,"
+                + "items.snippet.totalReplyCount,"
+                + "items.snippet.topLevelComment.snippet.authorProfileImageUrl,"
+                + "items.snippet.topLevelComment.snippet.authorChannelUrl,"
+                + "items.replies.comments.snippet.textOriginal,"
+                + "items.replies.comments.snippet.authorDisplayName,"
+                + "items.replies.comments.snippet.authorProfileImageUrl,"
+                + "items.replies.comments.snippet.authorProfileImageUrl,"
+                + "items.replies.comments.snippet.authorChannelUrl,"
+                + "items.replies.comments.snippet.likeCount,"
+                + "items.replies.comments.snippet.publishedAt")
             .execute();
         
         List<CommentThreadData> commentThreadList = new ArrayList<>();
@@ -64,15 +68,15 @@ public class CommentClient {
         return commentThreadList;
     }
 
-    private static CommentData getTopLevelCommentData(CommentThreadListResponse response, int i) {
+    private CommentData getTopLevelCommentData(CommentThreadListResponse response, int i) {
         try{
             CommentSnippet topLevelCommentSnippet = response.getItems().get(i).getSnippet().getTopLevelComment().getSnippet();
             return new CommentData(
                 topLevelCommentSnippet.getAuthorDisplayName(),
                 topLevelCommentSnippet.getAuthorProfileImageUrl(),
                 topLevelCommentSnippet.getAuthorChannelUrl(),
-                topLevelCommentSnippet.getTextDisplay(),
-                topLevelCommentSnippet.getVideoId(),
+                topLevelCommentSnippet.getTextOriginal(),
+                videoId,
                 null,
                 topLevelCommentSnippet.getLikeCount(),
                 topLevelCommentSnippet.getPublishedAt()
@@ -83,15 +87,20 @@ public class CommentClient {
         return null;
     }
 
-    private static List<CommentData> getCommentData(CommentThreadListResponse response, int i) {
+    private List<CommentData> getCommentData(CommentThreadListResponse response, int i) {
         try{
             List<com.google.api.services.youtube.model.Comment> replies = response.getItems().get(i).getReplies().getComments();
             List<CommentData> repliesList = new ArrayList<>();
             for (com.google.api.services.youtube.model.Comment reply : replies) {
                 CommentSnippet replySnippet = reply.getSnippet();
                 repliesList.add(
-                    new CommentData(replySnippet.getAuthorDisplayName(), replySnippet.getAuthorProfileImageUrl(), replySnippet.getAuthorChannelUrl(),
-                        replySnippet.getTextDisplay(), replySnippet.getVideoId(), replySnippet.getParentId(), replySnippet.getLikeCount(),
+                    new CommentData(replySnippet.getAuthorDisplayName(), 
+                        replySnippet.getAuthorProfileImageUrl(), 
+                        replySnippet.getAuthorChannelUrl(),
+                        replySnippet.getTextOriginal(), 
+                        videoId,
+                        replySnippet.getParentId(), 
+                        replySnippet.getLikeCount(),
                         replySnippet.getPublishedAt()));
             }
             return repliesList;

@@ -1,11 +1,13 @@
 package video;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.VideoListResponse;
 import com.google.api.services.youtube.model.VideoSnippet;
 import com.google.api.services.youtube.model.VideoStatistics;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,13 +54,15 @@ public class VideoClient {
         for(int i = 0; i < response.getItems().size(); i++) {
             VideoSnippet videoSnippet = response.getItems().get(i).getSnippet();
             VideoStatistics videoStatistics = response.getItems().get(i).getStatistics();
-            if (Objects.equals(response.getItems().get(i).getSnippet().getDefaultAudioLanguage(), "en")){
-                Video video = new Video(response.getItems().get(i).getId(),
-                    videoSnippet.getPublishedAt(),
-                    videoSnippet.getDefaultLanguage(),
-                    videoStatistics.getCommentCount());
+            if (Objects.equals(videoSnippet.getPublishedAt().toStringRfc3339().substring(0,10)
+                , LocalDate.now().toString())){
 
-                videoList.add(video);
+                    Video video = new Video(response.getItems().get(i).getId(),
+                        videoSnippet.getPublishedAt(),
+                        videoSnippet.getDefaultLanguage(),
+                        videoStatistics.getCommentCount());
+
+                    videoList.add(video);
             }
         }
         return videoList;

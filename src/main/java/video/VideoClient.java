@@ -1,6 +1,5 @@
 package video;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.VideoListResponse;
 import com.google.api.services.youtube.model.VideoSnippet;
@@ -8,7 +7,6 @@ import com.google.api.services.youtube.model.VideoStatistics;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

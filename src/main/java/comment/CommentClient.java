@@ -34,21 +34,23 @@ public class CommentClient {
             .list(part);
 
         CommentThreadListResponse response = request.setKey(DEVELOPER_KEY)
-            .setMaxResults(100L)
+            .setMaxResults(10L)
             .setOrder("relevance")
             .setVideoId(videoId)
             .setFields("items.snippet.videoId,"
                 + "items.snippet.topLevelComment.snippet.likeCount,"
                 + "items.snippet.topLevelComment.snippet.publishedAt,"
                 + "items.snippet.topLevelComment.snippet.authorDisplayName,"
+                + "items.snippet.topLevelComment.snippet.textDisplay,"
                 + "items.snippet.totalReplyCount,"
                 + "items.snippet.topLevelComment.snippet.authorProfileImageUrl,"
                 + "items.snippet.topLevelComment.snippet.authorChannelUrl,"
-                + "items.replies.comments.snippet.textOriginal,"
+                + "items.replies.comments.snippet.textDisplay,"
                 + "items.replies.comments.snippet.authorDisplayName,"
                 + "items.replies.comments.snippet.authorProfileImageUrl,"
                 + "items.replies.comments.snippet.authorProfileImageUrl,"
                 + "items.replies.comments.snippet.authorChannelUrl,"
+                + "items.replies.comments.snippet.parentId,"
                 + "items.replies.comments.snippet.likeCount,"
                 + "items.replies.comments.snippet.publishedAt")
             .execute();
@@ -58,7 +60,7 @@ public class CommentClient {
         for (int i = 0; i < response.getItems().size(); i++) {
             CommentData topLevelComment = getTopLevelCommentData(response, i);
 
-            List<CommentData> repliesList = null;
+            List<CommentData> repliesList = new ArrayList<>();
             if(response.getItems().get(i).getSnippet().getTotalReplyCount() != 0)
                 repliesList = getCommentData(response, i);
 
@@ -75,7 +77,7 @@ public class CommentClient {
                 topLevelCommentSnippet.getAuthorDisplayName(),
                 topLevelCommentSnippet.getAuthorProfileImageUrl(),
                 topLevelCommentSnippet.getAuthorChannelUrl(),
-                topLevelCommentSnippet.getTextOriginal(),
+                topLevelCommentSnippet.getTextDisplay(),
                 videoId,
                 null,
                 topLevelCommentSnippet.getLikeCount(),
@@ -97,7 +99,7 @@ public class CommentClient {
                     new CommentData(replySnippet.getAuthorDisplayName(), 
                         replySnippet.getAuthorProfileImageUrl(), 
                         replySnippet.getAuthorChannelUrl(),
-                        replySnippet.getTextOriginal(), 
+                        replySnippet.getTextDisplay(),
                         videoId,
                         replySnippet.getParentId(), 
                         replySnippet.getLikeCount(),

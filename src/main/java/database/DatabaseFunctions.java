@@ -2,9 +2,9 @@ package database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import comment.CommentData;
@@ -41,8 +41,8 @@ public class DatabaseFunctions {
     public void createTable(Connection connection){
         Statement statement;
         String query="CREATE TABLE IF NOT EXISTS comments" + localDateParsed + "(id SERIAL,"
-            + "authorDisplayName VARCHAR(100),authorProfileImageURL VARCHAR(100),authorChannelUrl VARCHAR(100),"
-            + "textOriginal VARCHAR(2500),videoId VARCHAR(12), parentId VARCHAR(25),likeRating INTEGER, PRIMARY KEY(id));";
+            + "authorDisplayName VARCHAR(100),authorProfileImageURL VARCHAR(150),authorChannelUrl VARCHAR(100),"
+            + "textOriginal VARCHAR(2500),videoId VARCHAR(12), parentId VARCHAR(50),likeRating INTEGER, PRIMARY KEY(id));";
         try {
             statement = connection.createStatement();
             statement.executeUpdate(query);
@@ -53,21 +53,37 @@ public class DatabaseFunctions {
         }
     }
 
-    public void insertIntoTodos(Connection connection, String table_name, List<CommentThreadData> commentThreadData){
-        Statement statement;
+    public void insertIntoCommentTable(Connection connection, List<CommentThreadData> commentThreadData) throws SQLException {
         try {
+            Statement statement = connection.createStatement();
             for(int i = 0; i < commentThreadData.size(); i++){
+                CommentData topLevelCommentData = commentThreadData.get(i).topLevelComment();
                 
-                String query="INSERT INTO comments" + localDateParsed + "(id SERIAL,"
-                    + "authorDisplayName STRING,authorProfileImageURL STRING,authorChannelUrl STRING,"
-                    + "textOriginal STRING,videoId STRING, parentId STRING,likeRating LONG, PRIMARY KEY(id));";
+                statement.addBatch("INSERT INTO comments" + localDateParsed + "("
+                    + " authorDisplayName, authorProfileImageURL, authorChannelUrl,"
+                    + " textOriginal, videoId, parentId, likeRating)"
+                    + "VALUES ('" + topLevelCommentData.authorDisplayName() + "','" + topLevelCommentData.authorProfileImageURL() + "','"
+                    + topLevelCommentData.authorChannelUrl() + "','" + topLevelCommentData.textDisplay() + "','" + topLevelCommentData.videoId()
+                    + "','" + topLevelCommentData.parentId() + "'," + topLevelCommentData.likeRating().toString() + ");");
 
-                statement = connection.createStatement();
-                statement.executeUpdate(query);
+                if(!commentThreadData.get(i).commentReplies().isEmpty()){
+                    for(int j = 0; j < commentThreadData.get(i).commentReplies().size(); j++){
+                        CommentData commentData = commentThreadData.get(i).commentReplies().get(j);
+
+                        statement.addBatch("INSERT INTO comments" + localDateParsed + "("
+                            + "authorDisplayName, authorProfileImageURL, authorChannelUrl, "
+                            + "textOriginal, videoId, parentId, likeRating)"
+                            + "VALUES ('" + commentData.authorDisplayName() + "','" + commentData.authorProfileImageURL() + "','"
+                            + commentData.authorChannelUrl() + "','" + commentData.textDisplay() + "','" + commentData.videoId()
+                            + "','" + commentData.parentId() + "'," + commentData.likeRating().toString() + ");");
+                    }
+                }
             }
-            System.out.println("Table created!");
+            statement.executeBatch();
+
+            System.out.println("Rows added!");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }  
+    }
 }

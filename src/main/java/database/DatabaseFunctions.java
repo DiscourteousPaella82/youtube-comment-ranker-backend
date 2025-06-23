@@ -1,7 +1,9 @@
 package database;
 
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
@@ -31,6 +33,7 @@ public class DatabaseFunctions {
             }
             else{
                 System.out.println("Failed to connect to database");
+                System.exit(1);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -41,9 +44,9 @@ public class DatabaseFunctions {
     public void createTable(Connection connection){
         Statement statement;
         String query="CREATE TABLE IF NOT EXISTS comments" + localDateParsed + "(id SERIAL,"
-            + "authorDisplayName VARCHAR(100),authorProfileImageURL VARCHAR(150),authorChannelUrl VARCHAR(100),"
+            + "authorDisplayName VARCHAR(100),authorProfileImageURL VARCHAR(150),authorChannelUrl VARCHAR(150),"
             + "textOriginal VARCHAR(2500),videoId VARCHAR(12), parentId VARCHAR(50),likeRating INTEGER, PRIMARY KEY(id));";
-        try {
+        try {            
             statement = connection.createStatement();
             statement.executeUpdate(query);
             System.out.println("Table comments" + localDateParsed + " created!");
@@ -55,35 +58,48 @@ public class DatabaseFunctions {
 
     public void insertIntoCommentTable(Connection connection, List<CommentThreadData> commentThreadData) throws SQLException {
         try {
-            Statement statement = connection.createStatement();
+            PreparedStatement preparedStatement = null;
+
+            String query = ("INSERT INTO comments" + localDateParsed +"("
+                + " authorDisplayName, authorProfileImageURL, authorChannelUrl,"
+                + " textOriginal, videoId, parentId, likeRating)"
+                + "VALUES (?,?,?,?,?,?,?);");
+
+            preparedStatement = connection.prepareStatement(query);
+
             for(int i = 0; i < commentThreadData.size(); i++){
                 CommentData topLevelCommentData = commentThreadData.get(i).topLevelComment();
-                
-                statement.addBatch("INSERT INTO comments" + localDateParsed + "("
-                    + " authorDisplayName, authorProfileImageURL, authorChannelUrl,"
-                    + " textOriginal, videoId, parentId, likeRating)"
-                    + "VALUES ('" + topLevelCommentData.authorDisplayName() + "','" + topLevelCommentData.authorProfileImageURL() + "','"
-                    + topLevelCommentData.authorChannelUrl() + "','" + topLevelCommentData.textDisplay() + "','" + topLevelCommentData.videoId()
-                    + "','" + topLevelCommentData.parentId() + "'," + topLevelCommentData.likeRating().toString() + ");");
+
+
+                preparedStatement.setString(1, topLevelCommentData.authorDisplayName());
+                preparedStatement.setString(2, topLevelCommentData.authorProfileImageURL());
+                preparedStatement.setString(3, topLevelCommentData.authorChannelUrl());
+                preparedStatement.setString(4, topLevelCommentData.textDisplay());
+                preparedStatement.setString(5, topLevelCommentData.videoId());
+                preparedStatement.setString(6, topLevelCommentData.parentId());
+                preparedStatement.setInt(7, Math.toIntExact(topLevelCommentData.likeRating()));
+                preparedStatement.addBatch();
 
                 if(!commentThreadData.get(i).commentReplies().isEmpty()){
                     for(int j = 0; j < commentThreadData.get(i).commentReplies().size(); j++){
                         CommentData commentData = commentThreadData.get(i).commentReplies().get(j);
 
-                        statement.addBatch("INSERT INTO comments" + localDateParsed + "("
-                            + "authorDisplayName, authorProfileImageURL, authorChannelUrl, "
-                            + "textOriginal, videoId, parentId, likeRating)"
-                            + "VALUES ('" + commentData.authorDisplayName() + "','" + commentData.authorProfileImageURL() + "','"
-                            + commentData.authorChannelUrl() + "','" + commentData.textDisplay() + "','" + commentData.videoId()
-                            + "','" + commentData.parentId() + "'," + commentData.likeRating().toString() + ");");
+                        preparedStatement.setString(1, commentData.authorDisplayName());
+                        preparedStatement.setString(2, commentData.authorProfileImageURL());
+                        preparedStatement.setString(3, commentData.authorChannelUrl());
+                        preparedStatement.setString(4, commentData.textDisplay());
+                        preparedStatement.setString(5, commentData.videoId());
+                        preparedStatement.setString(6, commentData.parentId());
+                        preparedStatement.setInt(7, Math.toIntExact(commentData.likeRating()));
+                        preparedStatement.addBatch();
                     }
                 }
             }
-            statement.executeBatch();
+            preparedStatement.executeBatch();
 
             System.out.println("Rows added!");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (BatchUpdateException e) {
+            throw new BatchUpdateException(e);
         }
     }
 }

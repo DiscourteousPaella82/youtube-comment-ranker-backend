@@ -33,40 +33,45 @@ public class CommentClient {
         YouTube.CommentThreads.List request = youTubeService.commentThreads()
             .list(part);
 
-        CommentThreadListResponse response = request.setKey(DEVELOPER_KEY)
-            .setMaxResults(10L)
-            .setOrder("relevance")
-            .setVideoId(videoId)
-            .setFields("items.snippet.videoId,"
-                + "items.snippet.topLevelComment.snippet.likeCount,"
-                + "items.snippet.topLevelComment.snippet.publishedAt,"
-                + "items.snippet.topLevelComment.snippet.authorDisplayName,"
-                + "items.snippet.topLevelComment.snippet.textDisplay,"
-                + "items.snippet.totalReplyCount,"
-                + "items.snippet.topLevelComment.snippet.authorProfileImageUrl,"
-                + "items.snippet.topLevelComment.snippet.authorChannelUrl,"
-                + "items.replies.comments.snippet.textDisplay,"
-                + "items.replies.comments.snippet.authorDisplayName,"
-                + "items.replies.comments.snippet.authorProfileImageUrl,"
-                + "items.replies.comments.snippet.authorProfileImageUrl,"
-                + "items.replies.comments.snippet.authorChannelUrl,"
-                + "items.replies.comments.snippet.parentId,"
-                + "items.replies.comments.snippet.likeCount,"
-                + "items.replies.comments.snippet.publishedAt")
-            .execute();
-        
         List<CommentThreadData> commentThreadList = new ArrayList<>();
 
-        for (int i = 0; i < response.getItems().size(); i++) {
-            CommentData topLevelComment = getTopLevelCommentData(response, i);
+        try{
+            CommentThreadListResponse response = request.setKey(DEVELOPER_KEY)
+                .setMaxResults(10L)
+                .setOrder("relevance")
+                .setVideoId(videoId)
+                .setFields("items.snippet.videoId,"
+                    + "items.snippet.topLevelComment.snippet.likeCount,"
+                    + "items.snippet.topLevelComment.snippet.publishedAt,"
+                    + "items.snippet.topLevelComment.snippet.authorDisplayName,"
+                    + "items.snippet.topLevelComment.snippet.textDisplay,"
+                    + "items.snippet.totalReplyCount,"
+                    + "items.snippet.topLevelComment.snippet.authorProfileImageUrl,"
+                    + "items.snippet.topLevelComment.snippet.authorChannelUrl,"
+                    + "items.replies.comments.snippet.textDisplay,"
+                    + "items.replies.comments.snippet.authorDisplayName,"
+                    + "items.replies.comments.snippet.authorProfileImageUrl,"
+                    + "items.replies.comments.snippet.authorProfileImageUrl,"
+                    + "items.replies.comments.snippet.authorChannelUrl,"
+                    + "items.replies.comments.snippet.parentId,"
+                    + "items.replies.comments.snippet.likeCount,"
+                    + "items.replies.comments.snippet.publishedAt")
+                .execute();
 
-            List<CommentData> repliesList = new ArrayList<>();
-            if(response.getItems().get(i).getSnippet().getTotalReplyCount() != 0)
-                repliesList = getCommentData(response, i);
 
-            commentThreadList.add(new CommentThreadData(topLevelComment, repliesList));
+            for (int i = 0; i < response.getItems().size(); i++) {
+                CommentData topLevelComment = getTopLevelCommentData(response, i);
+
+                List<CommentData> repliesList = new ArrayList<>();
+                if(response.getItems().get(i).getSnippet().getTotalReplyCount() != 0)
+                    repliesList = getCommentData(response, i);
+
+                commentThreadList.add(new CommentThreadData(topLevelComment, repliesList));
+
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
         return commentThreadList;
     }
 

@@ -35,8 +35,6 @@ public class Main {
             requestCount ++;
             List<Video> videoList = videoClient.getMostPopularVideos();
 
-
-
             CommentClient commentClient = new CommentClient(youTube);
 
             List<CommentThreadData> commentThreadData = new ArrayList<>();

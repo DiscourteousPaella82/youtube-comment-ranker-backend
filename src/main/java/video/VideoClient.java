@@ -1,6 +1,5 @@
 package video;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.VideoListResponse;
 import com.google.api.services.youtube.model.VideoSnippet;
@@ -8,7 +7,6 @@ import com.google.api.services.youtube.model.VideoStatistics;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -25,7 +23,7 @@ public class VideoClient {
         throws IOException{
         YouTube youtubeService = youtube;
 
-        List<String> part = new ArrayList<>();
+        List<String> part = new ArrayList<>();  
         part.add("snippet");
         part.add("statistics");
 
@@ -33,7 +31,7 @@ public class VideoClient {
             .list(part);
         VideoListResponse response = request.setKey(DEVELOPER_KEY)
             .setChart("mostPopular")
-            .setMaxResults(10L)
+            .setMaxResults(3L)
             .setRegionCode("US")
             .setFields("items.id,"
                 +"items.snippet.publishedAt,"
@@ -54,8 +52,8 @@ public class VideoClient {
         for(int i = 0; i < response.getItems().size(); i++) {
             VideoSnippet videoSnippet = response.getItems().get(i).getSnippet();
             VideoStatistics videoStatistics = response.getItems().get(i).getStatistics();
-            if (Objects.equals(videoSnippet.getPublishedAt().toStringRfc3339().substring(0,10)
-                , LocalDate.now().toString())){
+            if ((Objects.equals(videoSnippet.getPublishedAt().toStringRfc3339().substring(0,10)
+                , LocalDate.now().toString()) || (true)) && (videoStatistics.getCommentCount() != null)){
 
                     Video video = new Video(response.getItems().get(i).getId(),
                         videoSnippet.getPublishedAt(),

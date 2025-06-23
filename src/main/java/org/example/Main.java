@@ -2,12 +2,13 @@ package org.example;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
 import comment.CommentClient;
 import comment.CommentThreadData;
-
+import database.DatabaseFunctions;
 import video.Video;
 import video.VideoClient;
 import youtube.YoutubeClient;
@@ -23,7 +24,12 @@ public class Main {
         int numberComments = 0;
         int requestCount = 0;
 
-        try {
+        try {    
+            DatabaseFunctions databaseFunctions = new DatabaseFunctions();
+
+            Connection connection = databaseFunctions.connection_to_db("5431", "youtubeComments", "postgres", "postgres");
+            databaseFunctions.createTable(connection);
+            
             VideoClient videoClient = new VideoClient(youTube);
 
             requestCount ++;
@@ -40,7 +46,7 @@ public class Main {
                     videoList.get(i).id()));
                 
                 for (int j = 0; j < commentThreadData.size(); j++) {
-                    System.out.println(commentThreadData.get(i));
+                    System.out.println(commentThreadData.get(j));
                 }
 
                 for (CommentThreadData commentThreadData1 : commentThreadData) {
@@ -52,8 +58,11 @@ public class Main {
             }
             System.out.println("\n"+commentThreadData.size() + " comment threads captured.\n"
                 + numberComments + " total comments captured." + "\n" + requestCount + " requests made.");
+
+            databaseFunctions.insertIntoCommentTable(connection, commentThreadData);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
+        }        
+
     }
 }

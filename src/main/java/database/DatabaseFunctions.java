@@ -60,6 +60,7 @@ public class DatabaseFunctions {
         try {
             PreparedStatement preparedStatement = null;
 
+            int numberInsertions = 0;
             String query = ("INSERT INTO comments" + localDateParsed +"("
                 + " authorDisplayName, authorProfileImageURL, authorChannelUrl,"
                 + " textOriginal, videoId, parentId, likeRating)"
@@ -68,6 +69,7 @@ public class DatabaseFunctions {
             preparedStatement = connection.prepareStatement(query);
 
             for(int i = 0; i < commentThreadData.size(); i++){
+                numberInsertions++;
                 CommentData topLevelCommentData = commentThreadData.get(i).topLevelComment();
 
 
@@ -82,6 +84,7 @@ public class DatabaseFunctions {
 
                 if(!commentThreadData.get(i).commentReplies().isEmpty()){
                     for(int j = 0; j < commentThreadData.get(i).commentReplies().size(); j++){
+                        numberInsertions++;
                         CommentData commentData = commentThreadData.get(i).commentReplies().get(j);
 
                         preparedStatement.setString(1, commentData.authorDisplayName());
@@ -97,7 +100,7 @@ public class DatabaseFunctions {
             }
             preparedStatement.executeBatch();
 
-            System.out.println("Rows added!");
+            System.out.println(numberInsertions + " rows added!");
         } catch (BatchUpdateException e) {
             throw new BatchUpdateException(e);
         }

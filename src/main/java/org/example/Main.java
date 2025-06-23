@@ -60,6 +60,7 @@ public class Main {
                 + numberComments + " total comments captured." + "\n" + requestCount + " requests made.");
 
             databaseFunctions.insertIntoCommentTable(connection, commentThreadData);
+            connection.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }        

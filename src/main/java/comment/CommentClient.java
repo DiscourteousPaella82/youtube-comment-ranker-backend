@@ -79,7 +79,7 @@ public class CommentClient {
         try{
             CommentSnippet topLevelCommentSnippet = response.getItems().get(i).getSnippet().getTopLevelComment().getSnippet();
             return new CommentData(
-                topLevelCommentSnippet.getAuthorDisplayName(),
+                (topLevelCommentSnippet.getAuthorDisplayName().equals("")) ? null : topLevelCommentSnippet.getAuthorDisplayName(),
                 topLevelCommentSnippet.getAuthorProfileImageUrl(),
                 topLevelCommentSnippet.getAuthorChannelUrl(),
                 topLevelCommentSnippet.getTextDisplay(),

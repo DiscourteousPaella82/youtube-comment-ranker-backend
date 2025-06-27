@@ -39,6 +39,7 @@ public class Main {
 
             List<CommentThreadData> commentThreadData = new ArrayList<>();
 
+            long start = System.currentTimeMillis();
             for(int i = 0; i < videoList.size(); i++) {
 
                 requestCount ++;
@@ -56,6 +57,10 @@ public class Main {
                 }
 
             }
+            
+            long end = System.currentTimeMillis();
+            System.out.println("Time taken: " + (end - start));
+
             System.out.println("\n"+commentThreadData.size() + " comment threads captured.\n"
                 + numberComments + " total comments captured." + "\n" + requestCount + " requests made.");
 

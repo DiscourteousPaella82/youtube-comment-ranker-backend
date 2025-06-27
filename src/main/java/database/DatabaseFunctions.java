@@ -59,18 +59,18 @@ public class DatabaseFunctions {
     }
 
     public void insertIntoCommentTable(Connection connection, List<CommentThreadData> commentThreadData) throws SQLException {
-        try {
-            PreparedStatement preparedStatement = null;
+        PreparedStatement preparedStatement = null;
 
-            int numberInsertions = 0;
-            String query = ("INSERT INTO comments" + localDateParsed +"("
-                + " authorDisplayName, authorProfileImageURL, authorChannelUrl,"
-                + " textOriginal, videoId, parentId, likeRating)"
-                + "VALUES (?,?,?,?,?,?,?);");
+        int numberInsertions = 0;
+        String query = ("INSERT INTO comments" + localDateParsed +"("
+            + " authorDisplayName, authorProfileImageURL, authorChannelUrl,"
+            + " textOriginal, videoId, parentId, likeRating)"
+            + "VALUES (?,?,?,?,?,?,?);");
 
-            preparedStatement = connection.prepareStatement(query);
+        preparedStatement = connection.prepareStatement(query);
 
             for(int i = 0; i < commentThreadData.size(); i++){
+                try {   
                 numberInsertions++;
                 CommentData topLevelCommentData = commentThreadData.get(i).topLevelComment();
 
@@ -99,13 +99,22 @@ public class DatabaseFunctions {
                         preparedStatement.addBatch();
                     }
                 }
+                if(i % 100 == 0) preparedStatement.executeBatch();
+
+                } catch (BatchUpdateException e) {
+                    System.out.println("\u001B[31mError executing batch insert to database");
+                    e.printStackTrace();
+                }
             }
-            preparedStatement.executeBatch();
+
+            try{
+                preparedStatement.executeBatch();
+            } catch (BatchUpdateException e) {
+                System.out.println("\u001B[31mError executing batch insert to database");
+                e.printStackTrace();
+            }
 
             System.out.println(numberInsertions + " rows added!");
-        } catch (BatchUpdateException e) {
-            e.printStackTrace();
-            throw new BatchUpdateException(e);
-        }
+        
     }
 }

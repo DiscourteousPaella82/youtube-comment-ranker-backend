@@ -83,7 +83,8 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
                 (topLevelCommentSnippet.getAuthorDisplayName().equals("")) ? null : topLevelCommentSnippet.getAuthorDisplayName(),
                 topLevelCommentSnippet.getAuthorProfileImageUrl(),
                 topLevelCommentSnippet.getAuthorChannelUrl(),
-                topLevelCommentSnippet.getTextDisplay(),
+                (topLevelCommentSnippet.getTextDisplay().length() < 2499) ? topLevelCommentSnippet.getTextDisplay() : 
+                    topLevelCommentSnippet.getTextDisplay().substring(0, 2500),
                 videoId,
                 null,
                 topLevelCommentSnippet.getLikeCount(),

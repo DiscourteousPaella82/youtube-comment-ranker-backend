@@ -19,25 +19,40 @@ public class VideoClient {
         this.youtube = youtube;
     }
 
-    public List<Video> getMostPopularVideos()
-        throws IOException{
+    public List<Video> getMostPopularVideos() throws IOException{
         YouTube youtubeService = youtube;
 
         List<String> part = new ArrayList<>();  
         part.add("snippet");
         part.add("statistics");
+        
+        VideoListResponse response;
+        
+        int attempts = 0;
+        while(true){
+            try{
+                response = youtubeService.videos()
+                    .list(part)
+                    .setKey(DEVELOPER_KEY)
+                    .setChart("mostPopular")
+                    .setMaxResults(3L)
+                    .setRegionCode("US")
+                    .setFields("items.id,"
+                        +"items.snippet.publishedAt,"
+                        +"items.snippet.defaultAudioLanguage,"
+                        +"items.statistics.commentCount")
+                    .execute();
+                
+                break;
+            } catch ( IOException e) {
+                if(attempts > 2) 
+                    throw new IOException("\u001B[31mFailed to fetch videos within allowed attempt count\u001B[0m");
 
-        YouTube.Videos.List request = youtubeService.videos()
-            .list(part);
-        VideoListResponse response = request.setKey(DEVELOPER_KEY)
-            .setChart("mostPopular")
-            .setMaxResults(3L)
-            .setRegionCode("US")
-            .setFields("items.id,"
-                +"items.snippet.publishedAt,"
-                +"items.snippet.defaultAudioLanguage,"
-                +"items.statistics.commentCount")
-            .execute();
+                attempts++;
+                e.printStackTrace();
+                System.out.println("\u001B[31mError executing trying to fetch videos.\nAttempts remaining: " + (3-attempts) + "\u001B[0m");
+            }
+        }
 
         List<Video> videoList = getVideos(response);
 
@@ -47,20 +62,25 @@ public class VideoClient {
     }
 
     private static List<Video> getVideos(VideoListResponse response) {
-        List<Video> videoList = new ArrayList<>();
+        List<Video> videoList = new ArrayList<Video>();
 
         for(int i = 0; i < response.getItems().size(); i++) {
-            VideoSnippet videoSnippet = response.getItems().get(i).getSnippet();
-            VideoStatistics videoStatistics = response.getItems().get(i).getStatistics();
-            if ((Objects.equals(videoSnippet.getPublishedAt().toStringRfc3339().substring(0,10)
-                , LocalDate.now().toString()) || (true)) && (videoStatistics.getCommentCount() != null)){
+            try{
+                VideoSnippet videoSnippet = response.getItems().get(i).getSnippet();
+                VideoStatistics videoStatistics = response.getItems().get(i).getStatistics();
+                if ((Objects.equals(videoSnippet.getPublishedAt().toStringRfc3339().substring(0,10)
+                    , LocalDate.now().toString()) || (true)) && (videoStatistics.getCommentCount() != null)){
 
-                    Video video = new Video(response.getItems().get(i).getId(),
-                        videoSnippet.getPublishedAt(),
-                        videoSnippet.getDefaultLanguage(),
-                        videoStatistics.getCommentCount());
+                        Video video = new Video(response.getItems().get(i).getId(),
+                            videoSnippet.getPublishedAt(),
+                            videoSnippet.getDefaultLanguage(),
+                            videoStatistics.getCommentCount());
 
-                    videoList.add(video);
+                        videoList.add(video);
+            }
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("\u001B[31mError adding video to list\u001B[0m");
             }
         }
         return videoList;

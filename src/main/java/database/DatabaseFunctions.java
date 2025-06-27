@@ -102,7 +102,7 @@ public class DatabaseFunctions {
                 if(i % 100 == 0) preparedStatement.executeBatch();
 
                 } catch (BatchUpdateException e) {
-                    System.out.println("\u001B[31mError executing batch insert to database");
+                    System.out.println("\u001B[31mError executing batch insert to database\u001B[0m");
                     e.printStackTrace();
                 }
             }
@@ -110,11 +110,10 @@ public class DatabaseFunctions {
             try{
                 preparedStatement.executeBatch();
             } catch (BatchUpdateException e) {
-                System.out.println("\u001B[31mError executing batch insert to database");
+                System.out.println("\u001B[31mError executing batch insert to database\u001B[0m");
                 e.printStackTrace();
             }
 
             System.out.println(numberInsertions + " rows added!");
-        
     }
 }

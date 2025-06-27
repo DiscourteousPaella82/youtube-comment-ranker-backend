@@ -36,6 +36,7 @@ public class DatabaseFunctions {
                 System.exit(1);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
         return connection;
@@ -52,6 +53,7 @@ public class DatabaseFunctions {
             System.out.println("Table comments" + localDateParsed + " created!");
         } catch (Exception e) {
             System.out.println("ERROR: failed to create new table");
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -102,6 +104,7 @@ public class DatabaseFunctions {
 
             System.out.println(numberInsertions + " rows added!");
         } catch (BatchUpdateException e) {
+            e.printStackTrace();
             throw new BatchUpdateException(e);
         }
     }

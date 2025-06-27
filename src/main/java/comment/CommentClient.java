@@ -9,20 +9,21 @@ import com.google.api.services.youtube.model.CommentThreadListResponse;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.Callable;
 
-public class CommentClient {
+public class CommentClient implements Callable<List<CommentThreadData>>{
 
     private static final String DEVELOPER_KEY = System.getenv("YOUTUBEDATAV3APIKEY");
     private String videoId;
     private YouTube youTube;
 
-    public CommentClient(YouTube youTube){
+    public CommentClient(YouTube youTube, String videoId){
         this.youTube = youTube;
+        this.videoId = videoId;
     }
 
-    public List<CommentThreadData> findCommentThreadByVideoId(String videoId)
+    private List<CommentThreadData> findCommentThreadByVideoId()
         throws IOException {
-        this.videoId = videoId;
         System.out.println("Attempting to get comment thread data for video with id: " + videoId);
         YouTube youTubeService = youTube;
 
@@ -69,15 +70,15 @@ public class CommentClient {
                 commentThreadList.add(new CommentThreadData(topLevelComment, repliesList));
 
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return commentThreadList;
     }
 
-    private CommentData getTopLevelCommentData(CommentThreadListResponse response, int i) {
+    private CommentData getTopLevelCommentData(CommentThreadListResponse response, int index) {
         try{
-            CommentSnippet topLevelCommentSnippet = response.getItems().get(i).getSnippet().getTopLevelComment().getSnippet();
+            CommentSnippet topLevelCommentSnippet = response.getItems().get(index).getSnippet().getTopLevelComment().getSnippet();
             return new CommentData(
                 (topLevelCommentSnippet.getAuthorDisplayName().equals("")) ? null : topLevelCommentSnippet.getAuthorDisplayName(),
                 topLevelCommentSnippet.getAuthorProfileImageUrl(),
@@ -89,14 +90,14 @@ public class CommentClient {
                 topLevelCommentSnippet.getPublishedAt()
             );
         } catch (Exception e) {
-            System.out.println("Exception thrown while getting top level comment: " + e);
+            e.printStackTrace();
         }
         return null;
     }
 
-    private List<CommentData> getCommentData(CommentThreadListResponse response, int i) {
+    private List<CommentData> getCommentData(CommentThreadListResponse response, int index) {
         try{
-            List<com.google.api.services.youtube.model.Comment> replies = response.getItems().get(i).getReplies().getComments();
+            List<com.google.api.services.youtube.model.Comment> replies = response.getItems().get(index).getReplies().getComments();
             List<CommentData> repliesList = new ArrayList<>();
             for (com.google.api.services.youtube.model.Comment reply : replies) {
                 CommentSnippet replySnippet = reply.getSnippet();
@@ -112,8 +113,20 @@ public class CommentClient {
             }
             return repliesList;
         } catch (Exception e){
-            System.out.println("Exception thrown while getting replies: " + e);
+            e.printStackTrace();
         }
         return Collections.emptyList();
+    }
+
+    
+    @Override
+    public List<CommentThreadData> call() throws IOException{
+        List<CommentThreadData> commentThreadDataList = null;
+        try{
+            commentThreadDataList = findCommentThreadByVideoId();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        return commentThreadDataList;
     }
 }

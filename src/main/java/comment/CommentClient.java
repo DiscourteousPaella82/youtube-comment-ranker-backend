@@ -1,15 +1,16 @@
 package comment;
 
 import java.io.IOException;
+
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.concurrent.Callable;
+import java.util.Date;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.CommentSnippet;
 import com.google.api.services.youtube.model.CommentThreadListResponse;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.concurrent.Callable;
 
 public class CommentClient implements Callable<List<CommentThreadData>>{
 
@@ -24,7 +25,8 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
 
     private List<CommentThreadData> findCommentThreadByVideoId()
         throws IOException {
-        System.out.println("Attempting to get comment thread data for video with id: " + videoId);
+        System.out.println("\u001B[36m" + new Date() + ":: Thread " + Thread.currentThread().getId() 
+        + ": Attempting to get comment thread data for video with id: " + videoId + "\u001B[0m");
         YouTube youTubeService = youTube;
 
         List<String> part = new ArrayList<>();
@@ -72,6 +74,8 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
             }
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 
+                + ":Error adding comment to list\u001B[0m");
         }
         return commentThreadList;
     }
@@ -97,36 +101,40 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
     }
 
     private List<CommentData> getCommentData(CommentThreadListResponse response, int index) {
-        try{
-            List<com.google.api.services.youtube.model.Comment> replies = response.getItems().get(index).getReplies().getComments();
-            List<CommentData> repliesList = new ArrayList<>();
-            for (com.google.api.services.youtube.model.Comment reply : replies) {
-                CommentSnippet replySnippet = reply.getSnippet();
-                repliesList.add(
-                    new CommentData(replySnippet.getAuthorDisplayName(), 
-                        replySnippet.getAuthorProfileImageUrl(), 
-                        replySnippet.getAuthorChannelUrl(),
-                        replySnippet.getTextDisplay(),
-                        videoId,
-                        replySnippet.getParentId(), 
-                        replySnippet.getLikeCount(),
-                        replySnippet.getPublishedAt()));
-            }
-            return repliesList;
-        } catch (Exception e){
+        List<com.google.api.services.youtube.model.Comment> replies = response.getItems().get(index).getReplies().getComments();
+        List<CommentData> repliesList = new ArrayList<>();
+        
+        for (com.google.api.services.youtube.model.Comment reply : replies) {
+            try{
+            CommentSnippet replySnippet = reply.getSnippet();
+            repliesList.add(
+                new CommentData(replySnippet.getAuthorDisplayName(), 
+                    replySnippet.getAuthorProfileImageUrl(), 
+                    replySnippet.getAuthorChannelUrl(),
+                    replySnippet.getTextDisplay(),
+                    videoId,
+                    replySnippet.getParentId(), 
+                    replySnippet.getLikeCount(),
+                    replySnippet.getPublishedAt()));
+        
+            } catch (Exception e){
             e.printStackTrace();
+            System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 
+                + ":Error adding comment to list\u001B[0m");
+            }
         }
-        return Collections.emptyList();
+        
+        return (!replies.isEmpty()) ? repliesList : Collections.emptyList();
     }
 
-    
-    @Override
     public List<CommentThreadData> call() throws IOException{
         List<CommentThreadData> commentThreadDataList = null;
         try{
             commentThreadDataList = findCommentThreadByVideoId();
         } catch (IOException e){
             e.printStackTrace();
+            System.out.println("\u001B[31m " + new Date() + " ::Thread " + Thread.currentThread().getId() 
+                + ":IO Exception thrown\tVideo Id: " + videoId + "\u001B[0m");
         }
         return commentThreadDataList;
     }

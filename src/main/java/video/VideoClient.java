@@ -14,13 +14,17 @@ import java.util.Objects;
 public class VideoClient {
     private static final String DEVELOPER_KEY = System.getenv("YOUTUBEDATAV3APIKEY");
     private YouTube youtube;
+    private String nextPageToken;
+    private int requestCount;
     
     public VideoClient(YouTube youtube){
         this.youtube = youtube;
+        nextPageToken = null;
     }
 
     public List<Video> getMostPopularVideos() throws IOException{
         YouTube youtubeService = youtube;
+        requestCount = 0;
 
         List<String> part = new ArrayList<>();  
         part.add("snippet");
@@ -31,29 +35,30 @@ public class VideoClient {
         int attempts = 0;
         while(true){
             try{
+                requestCount++;
                 response = youtubeService.videos()
                     .list(part)
                     .setKey(DEVELOPER_KEY)
                     .setChart("mostPopular")
                     .setMaxResults(3L)
-                    .setRegionCode("US")
+                    .setPageToken(nextPageToken)
                     .setFields("items.id,"
                         +"items.snippet.publishedAt,"
                         +"items.snippet.defaultAudioLanguage,"
-                        +"items.statistics.commentCount")
+                        +"items.statistics.commentCount,"
+                        +"nextPageToken")
                     .execute();
                 
                 break;
             } catch ( IOException e) {
                 if(attempts > 2) 
-                    throw new IOException("\u001B[31mFailed to fetch videos within allowed attempt count\u001B[0m");
 
                 attempts++;
                 e.printStackTrace();
                 System.out.println("\u001B[31mError executing trying to fetch videos.\nAttempts remaining: " + (3-attempts) + "\u001B[0m");
             }
         }
-
+        nextPageToken = response.getNextPageToken();
         List<Video> videoList = getVideos(response);
 
         System.out.println(response);
@@ -84,5 +89,9 @@ public class VideoClient {
             }
         }
         return videoList;
+    }
+
+    public int getRequestCount(){
+        return requestCount;
     }
 }

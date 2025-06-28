@@ -15,7 +15,8 @@ import comment.CommentThreadData;
 
 public class DatabaseFunctions {
 
-    String localDateParsed;
+    private String localDateParsed;
+    private int numberInsertions;
 
     public DatabaseFunctions(){
         localDateParsed = LocalDate.now().toString().replace("-", "");
@@ -62,7 +63,7 @@ public class DatabaseFunctions {
     public void insertIntoCommentTable(Connection connection, List<CommentThreadData> commentThreadData) throws SQLException {
         PreparedStatement preparedStatement = null;
 
-        int numberInsertions = 0;
+        numberInsertions = 0;
         String query = ("INSERT INTO comments" + localDateParsed +"("
             + " authorDisplayName, authorProfileImageURL, authorChannelUrl,"
             + " textOriginal, videoId, parentId, likeRating)"
@@ -106,10 +107,11 @@ public class DatabaseFunctions {
                         numberInsertions++;
                         break;
                     } catch (BatchUpdateException e) {
-                        if(attempts > 2) 
+                        if(attempts > 2){
                             System.out.println("\u001B[31mFailed to add batch within allowed attempt count. Skipping batch\u001B[0m");
                             e.printStackTrace();
-
+                            break;
+                        }
                         attempts++;
                         System.out.println("\u001B[31mError executing batch insert to database. Attempts remaining: " + (3-attempts) + "\u001B[0m");
                         e.printStackTrace();
@@ -125,5 +127,9 @@ public class DatabaseFunctions {
             }
 
             System.out.println("\u001B[32m" + numberInsertions + " rows added!\u001B[0m");
+    }
+
+    public int getNumberInsertions(){
+        return numberInsertions;
     }
 }

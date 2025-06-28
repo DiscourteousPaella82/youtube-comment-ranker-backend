@@ -40,7 +40,7 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
 
         try{
             CommentThreadListResponse response = request.setKey(DEVELOPER_KEY)
-                .setMaxResults(10L)
+                .setMaxResults(100L)
                 .setOrder("relevance")
                 .setVideoId(videoId)
                 .setFields("items.snippet.videoId,"

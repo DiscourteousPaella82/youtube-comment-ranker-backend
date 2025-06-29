@@ -44,9 +44,11 @@ public class ThreadClient {
             for(Future<List<CommentThreadData>> future : futureList){
                 try {
                     commentThreadDataList.addAll(future.get());
-                    System.out.println(new Date()+ "::"+commentThreadDataList);
+                    System.out.println("\u001B[33m" + new Date() + ":: Comment thread added to comment list\u001B[0m");
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
+                    System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 
+                        + ":Error adding comment thread to list\u001B[0m");
                 }
             }
         } catch (InterruptedException e) {
@@ -64,7 +66,9 @@ public class ThreadClient {
             commentCount += commentThreadData.commentReplies().size();
         }
 
-        System.out.println("Number of comment requests made: " + commentRequestCount + "\nNumber of commentThreads received: " + commentThreadCount + "\n Number of comments received: " + commentCount + "\nTime taken: " + timeElapsed + "ms");
+        System.out.println("\u001B[34mNumber of comment requests made: " + commentRequestCount 
+            + "\nNumber of commentThreads received: " + commentThreadCount + "\nNumber of comments received: " 
+            + commentCount + "\nTime taken: " + timeElapsed + "ms \u001B[0m");
 
         return commentThreadDataList;
     }

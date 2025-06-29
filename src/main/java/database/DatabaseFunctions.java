@@ -1,6 +1,5 @@
 package database;
 
-import java.io.IOException;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.DriverManager;

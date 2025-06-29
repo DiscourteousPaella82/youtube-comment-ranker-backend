@@ -20,7 +20,6 @@ import com.google.api.services.youtube.YouTube;
 public class Main{
     public static void main(String[] args) throws GeneralSecurityException, IOException {
         YouTube youTube = YoutubeClient.getService();
-
         DatabaseFunctions databaseFunctions = new DatabaseFunctions();
 
         String PORT = System.getenv("DATABASE_PORT");
@@ -40,12 +39,15 @@ public class Main{
         int totalRequestCount = 0;
         int totalCommentCount = 0;
         int totalRowsInserted = 0;
+        int remainingQuota = 50;
 
-        while(totalRequestCount < 50){
+        long start = System.currentTimeMillis();
+
+        while(remainingQuota > 0){
             while(true){
                 try{
                     videoList = videoClient.getMostPopularVideos();
-                    totalRequestCount = videoClient.getRequestCount();
+                    remainingQuota -= videoClient.getRequestCount();
                     break;
                 } catch (IOException e){
                     System.out.println("\u001B[31mVideo list failed to fetch\u001B[0m");
@@ -65,23 +67,28 @@ public class Main{
 
             ThreadClient threadClient = new ThreadClient();
             List<CommentThreadData> commentThreadData = threadClient.requestCommentThreadData(youTube, videoList);
-            totalRequestCount = threadClient.getCommentRequestCount();
+            remainingQuota -= threadClient.getCommentRequestCount();
             totalCommentCount = threadClient.getCommentCount();
 
             try {
                 databaseFunctions.insertIntoCommentTable(connection, commentThreadData);
-
-                break;
             } catch (SQLException e) {
                 e.printStackTrace();
                 System.out.println("\u001B[31mError closing connection\u001B[0m");
                 System.exit(1);
             }
+
+            System.out.println("\uu001B[35mRemaining Quota: " + remainingQuota + "\u001B[0m");
         }
 
+
+        long finish = System.currentTimeMillis();
+        long timeElapsed = finish - start;
+
         System.out.println("\u001B[32m" + new Date() +" Finished fetching comments:\nTotal number of requests made: " + totalRequestCount + "\nTotal number of comments returned: " 
-        + totalCommentCount + "\nTotal number of rows inserted: " + totalRowsInserted + "\nNumber of lost comments: " + (totalCommentCount - totalRowsInserted));
-        
+            + totalCommentCount + "\nTotal number of rows inserted: " + totalRowsInserted + "\nNumber of lost comments: " + (totalCommentCount - totalRowsInserted) + "\nTime taken: " 
+            + timeElapsed + "\nFinal page token: " + videoClient.getNextPageToken() + "\u001B[0m");
+            
         try{
             connection.close();
         } catch (SQLException e) {

@@ -44,7 +44,7 @@ public class ThreadClient {
             for(Future<List<CommentThreadData>> future : futureList){
                 try {
                     commentThreadDataList.addAll(future.get());
-                    System.out.println("\u001B[33m" + new Date() + ":: Comment thread added\u001B[0m");
+                    System.out.println("\u001B[33m" + new Date() + ":: Comment thread added to comment list\u001B[0m");
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                     System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 

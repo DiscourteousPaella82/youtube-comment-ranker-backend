@@ -47,7 +47,7 @@ public class DatabaseFunctions {
     public void createTable(Connection connection){
         Statement statement;
         String query="CREATE TABLE IF NOT EXISTS comments" + localDateParsed + "(id SERIAL,"
-            + "authorDisplayName VARCHAR(100),authorProfileImageURL VARCHAR(150),authorChannelUrl VARCHAR(150),"
+            + "authorDisplayName VARCHAR(100),authorProfileImageURL VARCHAR(150),authorChannelUrl VARCHAR(200),"
             + "textOriginal VARCHAR(2500),videoId VARCHAR(12), parentId VARCHAR(50),likeRating INTEGER, PRIMARY KEY(id));";
         try {            
             statement = connection.createStatement();

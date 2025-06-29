@@ -8,6 +8,7 @@ import com.google.api.services.youtube.model.VideoStatistics;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,6 +34,7 @@ public class VideoClient {
         VideoListResponse response;
         
         int attempts = 0;
+        System.out.println("\u001B[36m" + new Date() + "Attempting to get video list with nextPageToken: " + nextPageToken + "\u001B[0m");
         while(true){
             try{
                 requestCount++;
@@ -42,6 +44,7 @@ public class VideoClient {
                     .setChart("mostPopular")
                     .setMaxResults(3L)
                     .setPageToken(nextPageToken)
+                    .setRegionCode("US")
                     .setFields("items.id,"
                         +"items.snippet.publishedAt,"
                         +"items.snippet.defaultAudioLanguage,"
@@ -74,7 +77,7 @@ public class VideoClient {
                 VideoSnippet videoSnippet = response.getItems().get(i).getSnippet();
                 VideoStatistics videoStatistics = response.getItems().get(i).getStatistics();
                 if ((Objects.equals(videoSnippet.getPublishedAt().toStringRfc3339().substring(0,10)
-                    , LocalDate.now().toString()) || (true)) && (videoStatistics.getCommentCount() != null)){
+                    , LocalDate.now().toString()) || (true)) && (videoStatistics.getCommentCount() != null)){   //remove (true) when ready
 
                         Video video = new Video(response.getItems().get(i).getId(),
                             videoSnippet.getPublishedAt(),
@@ -93,5 +96,9 @@ public class VideoClient {
 
     public int getRequestCount(){
         return requestCount;
+    }
+
+    public String getNextPageToken(){
+        return nextPageToken;
     }
 }

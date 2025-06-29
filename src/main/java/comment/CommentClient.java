@@ -65,9 +65,15 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
             for (int i = 0; i < response.getItems().size(); i++) {
                 CommentData topLevelComment = getTopLevelCommentData(response, i);
 
-                List<CommentData> repliesList = new ArrayList<>();
-                if(response.getItems().get(i).getSnippet().getTotalReplyCount() != 0)
-                    repliesList = getCommentData(response, i);
+                List<CommentData> repliesList = new ArrayList<>(); 
+                
+                try{
+                    if(response.getItems().get(i).getSnippet().getTotalReplyCount() != 0L)
+                        repliesList = getCommentRepliesData(response, i);
+                } catch (Exception e){
+                    System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 
+                + ":Error reading replies\u001B[0m");
+                }
 
                 commentThreadList.add(new CommentThreadData(topLevelComment, repliesList));
 
@@ -96,11 +102,13 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
             );
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 
+                + ":Error adding top level comment to list\u001B[0m");
         }
         return null;
     }
 
-    private List<CommentData> getCommentData(CommentThreadListResponse response, int index) {
+    private List<CommentData> getCommentRepliesData(CommentThreadListResponse response, int index) {
         List<com.google.api.services.youtube.model.Comment> replies = response.getItems().get(index).getReplies().getComments();
         List<CommentData> repliesList = new ArrayList<>();
         
@@ -108,10 +116,12 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
             try{
             CommentSnippet replySnippet = reply.getSnippet();
             repliesList.add(
-                new CommentData(replySnippet.getAuthorDisplayName(), 
+                new CommentData(
+                    (replySnippet.getAuthorDisplayName().equals("")) ? null : replySnippet.getAuthorDisplayName(), 
                     replySnippet.getAuthorProfileImageUrl(), 
                     replySnippet.getAuthorChannelUrl(),
-                    replySnippet.getTextDisplay(),
+                    (replySnippet.getTextDisplay().length() < 2499) ? replySnippet.getTextDisplay() : 
+                        replySnippet.getTextDisplay().substring(0, 2499),
                     videoId,
                     replySnippet.getParentId(), 
                     replySnippet.getLikeCount(),
@@ -120,7 +130,7 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
             } catch (Exception e){
             e.printStackTrace();
             System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 
-                + ":Error adding comment to list\u001B[0m");
+                + ":Error adding comment reply to list\u001B[0m");
             }
         }
         

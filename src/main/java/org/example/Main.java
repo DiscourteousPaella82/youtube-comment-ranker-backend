@@ -39,7 +39,7 @@ public class Main{
         int totalRequestCount = 0;
         int totalCommentCount = 0;
         int totalRowsInserted = 0;
-        int remainingQuota = 50;
+        int remainingQuota = 20;
 
         long start = System.currentTimeMillis();
 
@@ -47,6 +47,7 @@ public class Main{
             while(true){
                 try{
                     videoList = videoClient.getMostPopularVideos();
+                    totalRequestCount += videoClient.getRequestCount();
                     remainingQuota -= videoClient.getRequestCount();
                     break;
                 } catch (IOException e){
@@ -67,18 +68,20 @@ public class Main{
 
             ThreadClient threadClient = new ThreadClient();
             List<CommentThreadData> commentThreadData = threadClient.requestCommentThreadData(youTube, videoList);
+            totalRequestCount += threadClient.getCommentRequestCount();
             remainingQuota -= threadClient.getCommentRequestCount();
-            totalCommentCount = threadClient.getCommentCount();
+            totalCommentCount += threadClient.getCommentCount();
 
             try {
                 databaseFunctions.insertIntoCommentTable(connection, commentThreadData);
+                totalRowsInserted += databaseFunctions.getNumberInsertions();
             } catch (SQLException e) {
                 e.printStackTrace();
                 System.out.println("\u001B[31mError closing connection\u001B[0m");
                 System.exit(1);
             }
 
-            System.out.println("\uu001B[35mRemaining Quota: " + remainingQuota + "\u001B[0m");
+            System.out.println("\uu001B[35mRequests made: " + totalRequestCount + "\nRemaining Quota: " + remainingQuota + "\u001B[0m");
         }
 
 
@@ -87,7 +90,7 @@ public class Main{
 
         System.out.println("\u001B[32m" + new Date() +" Finished fetching comments:\nTotal number of requests made: " + totalRequestCount + "\nTotal number of comments returned: " 
             + totalCommentCount + "\nTotal number of rows inserted: " + totalRowsInserted + "\nNumber of lost comments: " + (totalCommentCount - totalRowsInserted) + "\nTime taken: " 
-            + timeElapsed + "\nFinal page token: " + videoClient.getNextPageToken() + "\u001B[0m");
+            + timeElapsed + "ms\nFinal page token: " + videoClient.getNextPageToken() + "\u001B[0m");
             
         try{
             connection.close();

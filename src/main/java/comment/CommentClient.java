@@ -16,7 +16,7 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
 
     private static final String DEVELOPER_KEY = System.getenv("YOUTUBEDATAV3APIKEY");
     private String videoId;
-    private YouTube youTube;
+    private final YouTube youTube;
 
     public CommentClient(YouTube youTube, String videoId){
         this.youTube = youTube;
@@ -27,13 +27,12 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
         throws IOException {
         System.out.println("\u001B[36m" + new Date() + ":: Thread " + Thread.currentThread().getId() 
         + ": Attempting to get comment thread data for video with id: " + videoId + "\u001B[0m");
-        YouTube youTubeService = youTube;
 
         List<String> part = new ArrayList<>();
         part.add("snippet");
         part.add("replies");
 
-        YouTube.CommentThreads.List request = youTubeService.commentThreads()
+        YouTube.CommentThreads.List request = youTube.commentThreads()
             .list(part);
 
         List<CommentThreadData> commentThreadList = new ArrayList<>();
@@ -61,8 +60,8 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
                     + "items.replies.comments.snippet.publishedAt")
                 .execute();
 
-
-            for (int i = 0; i < response.getItems().size(); i++) {
+            int size = response.getItems().size();
+            for (int i = 0; i < size; i++) {
                 CommentData topLevelComment = getTopLevelCommentData(response, i);
 
                 List<CommentData> repliesList = new ArrayList<>(); 
@@ -72,7 +71,7 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
                         repliesList = getCommentRepliesData(response, i);
                 } catch (Exception e){
                     System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 
-                + ":Error reading replies\u001B[0m");
+                    + ":Error reading replies\u001B[0m");
                 }
 
                 commentThreadList.add(new CommentThreadData(topLevelComment, repliesList));
@@ -90,7 +89,7 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
         try{
             CommentSnippet topLevelCommentSnippet = response.getItems().get(index).getSnippet().getTopLevelComment().getSnippet();
             return new CommentData(
-                (topLevelCommentSnippet.getAuthorDisplayName().equals("")) ? null : topLevelCommentSnippet.getAuthorDisplayName(),
+                (topLevelCommentSnippet.getAuthorDisplayName().isEmpty()) ? null : topLevelCommentSnippet.getAuthorDisplayName(),
                 topLevelCommentSnippet.getAuthorProfileImageUrl(),
                 topLevelCommentSnippet.getAuthorChannelUrl(),
                 (topLevelCommentSnippet.getTextDisplay().length() < 2499) ? topLevelCommentSnippet.getTextDisplay() : 
@@ -117,7 +116,7 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
             CommentSnippet replySnippet = reply.getSnippet();
             repliesList.add(
                 new CommentData(
-                    (replySnippet.getAuthorDisplayName().equals("")) ? null : replySnippet.getAuthorDisplayName(), 
+                    (replySnippet.getAuthorDisplayName().isEmpty()) ? null : replySnippet.getAuthorDisplayName(),
                     replySnippet.getAuthorProfileImageUrl(), 
                     replySnippet.getAuthorChannelUrl(),
                     (replySnippet.getTextDisplay().length() < 2499) ? replySnippet.getTextDisplay() : 

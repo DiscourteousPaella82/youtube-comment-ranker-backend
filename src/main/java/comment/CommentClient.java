@@ -12,10 +12,22 @@ import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.CommentSnippet;
 import com.google.api.services.youtube.model.CommentThreadListResponse;
 
+/**
+ * Contains functionality for fetching lists of CommentThreads
+ */
 public class CommentClient implements Callable<List<CommentThreadData>>{
 
+    /**
+     * Google API key
+     */
     private static final String DEVELOPER_KEY = System.getenv("YOUTUBEDATAV3APIKEY");
+    /**
+     * Video ID which comments are being fetched from
+     */
     private String videoId;
+    /**
+     * YouTube object provides access to YouTube
+     */
     private final YouTube youTube;
 
     public CommentClient(YouTube youTube, String videoId){
@@ -23,6 +35,11 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
         this.videoId = videoId;
     }
 
+    /**
+     * Gets a hardcoded amount of maximum amount comments(100 max) from video with videoId.
+     * @return List of CommentThreadData
+     * @throws IOException
+     */
     private List<CommentThreadData> findCommentThreadByVideoId()
         throws IOException {
         System.out.println("\u001B[36m" + new Date() + ":: Thread " + Thread.currentThread().getId() 
@@ -85,6 +102,12 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
         return commentThreadList;
     }
 
+    /**
+     * Assigns top level comment data
+     * @param response Request response object
+     * @param index index of item in the response
+     * @return CommentData for the topLevelComment
+     */
     private CommentData getTopLevelCommentData(CommentThreadListResponse response, int index) {
         try{
             CommentSnippet topLevelCommentSnippet = response.getItems().get(index).getSnippet().getTopLevelComment().getSnippet();
@@ -107,6 +130,12 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
         return null;
     }
 
+    /**
+     * Assigns reply list
+     * @param response Request response object
+     * @param index index of item in the response
+     * @return List of CommentData
+     */
     private List<CommentData> getCommentRepliesData(CommentThreadListResponse response, int index) {
         List<com.google.api.services.youtube.model.Comment> replies = response.getItems().get(index).getReplies().getComments();
         List<CommentData> repliesList = new ArrayList<>();
@@ -136,6 +165,11 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
         return (!replies.isEmpty()) ? repliesList : Collections.emptyList();
     }
 
+    /**
+     * Callable method for threads
+     * @return List of CommentThreadData
+     * @throws IOException
+     */
     public List<CommentThreadData> call() throws IOException{
         List<CommentThreadData> commentThreadDataList = null;
         try{

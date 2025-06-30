@@ -16,6 +16,9 @@ import youtube.YoutubeClient;
 
 import com.google.api.services.youtube.YouTube;
 
+/**
+ * Main program method
+ */
 public class Main{
     public static void main(String[] args) throws GeneralSecurityException, IOException {
         YouTube youTube = YoutubeClient.getService();
@@ -29,8 +32,8 @@ public class Main{
         
         String DBPASSWORD = System.getenv("DATABASE_PASSWORD");
 
-        Connection connection = databaseFunctions.connectionToDb(PORT, DBNAME, DBUSER, DBPASSWORD);
-        databaseFunctions.createTable(connection);
+        Connection connection = databaseFunctions.connectionToDb(PORT, DBNAME, DBUSER, DBPASSWORD); //creates connection to the database
+        databaseFunctions.createTable(connection);  //creates table if it doesn't exist already
 
         VideoClient videoClient = new VideoClient(youTube);
         List<Video> videoList;
@@ -45,7 +48,7 @@ public class Main{
         while(remainingQuota > 0){
             while(true){
                 try{
-                    videoList = videoClient.getMostPopularVideos();
+                    videoList = videoClient.getMostPopularVideos(); //gets List of VIdeos
                     totalRequestCount += videoClient.getRequestCount();
                     remainingQuota -= videoClient.getRequestCount();
                     break;
@@ -55,8 +58,8 @@ public class Main{
                 }
             }
 
-            if(videoList.isEmpty()){
-                System.out.println("\u001B[31mVideo list is empty. Aborting program\u001B[0m");
+            if(videoList.isEmpty()){    //if the returned List of Videos are empty, the program has critically failed to get anything and must exit
+                System.out.println("\u001B[31mCRITICAL ERROR: Video list is empty. Aborting program\u001B[0m");
                 try{
                     connection.close();
                 } catch (SQLException e){
@@ -66,17 +69,17 @@ public class Main{
             }
 
             ThreadClient threadClient = new ThreadClient();
-            List<CommentThreadData> commentThreadData = threadClient.requestCommentThreadData(youTube, videoList);
+            List<CommentThreadData> commentThreadData = threadClient.requestCommentThreadData(youTube, videoList);  //Fetches CommentData via the ThreadClient
             totalRequestCount += threadClient.getCommentRequestCount();
             remainingQuota -= threadClient.getCommentRequestCount();
             totalCommentCount += threadClient.getCommentCount();
 
             try {
-                databaseFunctions.insertIntoCommentTable(connection, commentThreadData);
+                databaseFunctions.insertIntoCommentTable(connection, commentThreadData);    //inserts CommentThreadData into the database
                 totalRowsInserted += databaseFunctions.getNumberInsertions();
             } catch (SQLException e) {
                 e.printStackTrace();
-                System.out.println("\u001B[31mError closing connection\u001B[0m");
+                System.out.println("\u001B[31mError inserting comments into database\u001B[0m");
                 System.exit(1);
             }
 

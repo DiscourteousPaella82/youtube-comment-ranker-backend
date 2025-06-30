@@ -8,6 +8,9 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 
+/**
+ * Used to build YouTube object
+ */
 public final class YoutubeClient {
     private static final String APPLICATION_NAME = "COMMENT FETCH APP";
     private static final GsonFactory GSON_FACTORY = GsonFactory.getDefaultInstance();

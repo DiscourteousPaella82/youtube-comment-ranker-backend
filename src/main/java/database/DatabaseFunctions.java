@@ -6,24 +6,30 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDate;
 import java.util.List;
 
 import comment.CommentData;
 import comment.CommentThreadData;
 
+/**
+ * Provides functionality for interacting with a local PostGreSQL database
+ */
 public class DatabaseFunctions {
-
-    private final String localDateParsed;
+    /**
+     * Row insetion count
+     */
     private int numberInsertions;
 
-    public DatabaseFunctions(){
-        localDateParsed = LocalDate.now().toString().replace("-", "");
-        System.out.println("Date: " + localDateParsed);
-    }
-
+    /**
+     * Creates a connection to the database
+     * @param port Database host port
+     * @param dbname Database name
+     * @param username Database username
+     * @param password Database password
+     * @return Connected Connection object
+     */
     public Connection connectionToDb(String port, String dbname, String username, String password){
-        Connection connection = null;
+        Connection connection;
 
         try{
             Class.forName("org.postgresql.Driver");
@@ -43,6 +49,10 @@ public class DatabaseFunctions {
         return connection;
     }
 
+    /**
+     * Creates comment table if it doesn't exist
+     * @param connection
+     */
     public void createTable(Connection connection){
         Statement statement;
         String query="CREATE TABLE IF NOT EXISTS comments(id SERIAL,"
@@ -59,6 +69,12 @@ public class DatabaseFunctions {
         }
     }
 
+    /**
+     * Inserts CommentData into the comment table in batches of 100.
+     * @param connection
+     * @param commentThreadData List of CommentThreadData
+     * @throws SQLException
+     */
     public void insertIntoCommentTable(Connection connection, List<CommentThreadData> commentThreadData) throws SQLException {
         PreparedStatement preparedStatement = null;
 
@@ -129,6 +145,9 @@ public class DatabaseFunctions {
         System.out.println("\u001B[32m" + numberInsertions + " rows added!\u001B[0m");
     }
 
+    /**
+     * @return number of row insertions
+     */
     public int getNumberInsertions(){
         return numberInsertions;
     }

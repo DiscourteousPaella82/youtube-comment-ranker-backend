@@ -15,12 +15,30 @@ import comment.CommentClient;
 import comment.CommentThreadData;
 import video.Video;
 
+/**
+ * Handles threads & futures for fetching comment lists functionality.
+ */
 public class ThreadClient {
 
+    /**
+     * The number of comments returned from all threads
+     */
     private int commentCount;
+    /**
+     * The number of comment threads returned from all threads
+     */
     private int commentThreadCount;
+    /**
+     * The number of requests made to the API
+     */
     private int commentRequestCount;
 
+    /**
+     * Creates multiple threads to concurrently make requests and store CommentThreadData. Returns a list of CommentThreadData aggregated from all threads
+     * @param youTube YouTube object
+     * @param videoList List of Videos
+     * @return List of CommentThreadData
+     */
     public List<CommentThreadData> requestCommentThreadData(YouTube youTube,List<Video> videoList){
         commentCount = 0;
         commentRequestCount = 0;
@@ -72,14 +90,24 @@ public class ThreadClient {
 
         return commentThreadDataList;
     }
+
+    /**
+     * @return Count of comments fetched across all threads
+     */
     public int getCommentCount(){
         return commentCount;
     }
-    
+
+    /**
+     * @return Count of comment threads fetched across all threads
+     */
     public int getCommentThreadCount(){
         return commentThreadCount;
-    }    
-    
+    }
+
+    /**
+     * @return Count of requests made across all threads
+     */
     public int getCommentRequestCount(){
         return commentRequestCount;
     }

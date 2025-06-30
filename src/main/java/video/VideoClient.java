@@ -12,10 +12,25 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Has functionality for returning Lists of Videos
+ */
 public class VideoClient {
+    /**
+     * Google API key
+     */
     private static final String DEVELOPER_KEY = System.getenv("YOUTUBEDATAV3APIKEY");
+    /**
+     * YouTube object provides access to YouTube
+     */
     private final YouTube youtube;
+    /**
+     * Pagination token
+     */
     private String nextPageToken;
+    /**
+     * Count of requests made
+     */
     private int requestCount;
     
     public VideoClient(YouTube youtube){
@@ -23,6 +38,11 @@ public class VideoClient {
         nextPageToken = null;
     }
 
+    /**
+     * Requests the 'most relevant' videos given the page token.
+     * @return List of Videos
+     * @throws IOException
+     */
     public List<Video> getMostPopularVideos() throws IOException{
         requestCount = 0;
 
@@ -71,8 +91,13 @@ public class VideoClient {
         return videoList;
     }
 
+    /**
+     * Assignment function for Video List from response
+     * @param response Video GET response
+     * @return
+     */
     private static List<Video> getVideos(VideoListResponse response) {
-        List<Video> videoList = new ArrayList<Video>();
+        List<Video> videoList = new ArrayList<>();
 
         int size = response.getItems().size();
         for(int i = 0; i < size; i++) {
@@ -97,10 +122,16 @@ public class VideoClient {
         return videoList;
     }
 
+    /**
+     * @return Count of requests made
+     */
     public int getRequestCount(){
         return requestCount;
     }
 
+    /**
+     * @return Next page token
+     */
     public String getNextPageToken(){
         return nextPageToken;
     }

@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public class VideoClient {
     private static final String DEVELOPER_KEY = System.getenv("YOUTUBEDATAV3APIKEY");
-    private YouTube youtube;
+    private final YouTube youtube;
     private String nextPageToken;
     private int requestCount;
     
@@ -24,7 +24,6 @@ public class VideoClient {
     }
 
     public List<Video> getMostPopularVideos() throws IOException{
-        YouTube youtubeService = youtube;
         requestCount = 0;
 
         List<String> part = new ArrayList<>();  
@@ -38,7 +37,7 @@ public class VideoClient {
         while(true){
             try{
                 requestCount++;
-                response = youtubeService.videos()
+                response = youtube.videos()
                     .list(part)
                     .setKey(DEVELOPER_KEY)
                     .setChart("mostPopular")
@@ -53,9 +52,12 @@ public class VideoClient {
                     .execute();
                 
                 break;
-            } catch ( IOException e) {
-                if(attempts > 2) 
-
+            } catch (IOException e) {
+                if(attempts > 2){
+                    System.out.println("\u001B[31mCritical Error executing trying to fetch videos. Exiting program\n");
+                    e.printStackTrace();
+                    System.exit(1);
+                }
                 attempts++;
                 e.printStackTrace();
                 System.out.println("\u001B[31mError executing trying to fetch videos.\nAttempts remaining: " + (3-attempts) + "\u001B[0m");
@@ -72,7 +74,8 @@ public class VideoClient {
     private static List<Video> getVideos(VideoListResponse response) {
         List<Video> videoList = new ArrayList<Video>();
 
-        for(int i = 0; i < response.getItems().size(); i++) {
+        int size = response.getItems().size();
+        for(int i = 0; i < size; i++) {
             try{
                 VideoSnippet videoSnippet = response.getItems().get(i).getSnippet();
                 VideoStatistics videoStatistics = response.getItems().get(i).getStatistics();

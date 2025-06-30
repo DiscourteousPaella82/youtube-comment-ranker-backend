@@ -28,10 +28,10 @@ public class ThreadClient {
         long start = System.currentTimeMillis();
         ExecutorService executor = Executors.newFixedThreadPool(100);
         
-        List<Future<List<CommentThreadData>>> futureList = new ArrayList<Future<List<CommentThreadData>>>();
-        List<Callable<List<CommentThreadData>>> callables = new ArrayList<Callable<List<CommentThreadData>>>();
+        List<Future<List<CommentThreadData>>> futureList;
+        List<Callable<List<CommentThreadData>>> callables = new ArrayList<>();
 
-        List<CommentThreadData> commentThreadDataList = new ArrayList<CommentThreadData>();
+        List<CommentThreadData> commentThreadDataList = new ArrayList<>();
 
         try{
             for(Video video:videoList){
@@ -72,7 +72,6 @@ public class ThreadClient {
 
         return commentThreadDataList;
     }
-    
     public int getCommentCount(){
         return commentCount;
     }

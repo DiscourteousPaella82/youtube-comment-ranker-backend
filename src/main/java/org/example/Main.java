@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -30,11 +29,11 @@ public class Main{
         
         String DBPASSWORD = System.getenv("DATABASE_PASSWORD");
 
-        Connection connection = databaseFunctions.connection_to_db(PORT, DBNAME, DBUSER, DBPASSWORD);
+        Connection connection = databaseFunctions.connectionToDb(PORT, DBNAME, DBUSER, DBPASSWORD);
         databaseFunctions.createTable(connection);
 
         VideoClient videoClient = new VideoClient(youTube);
-        List<Video> videoList = new ArrayList<Video>();
+        List<Video> videoList;
 
         int totalRequestCount = 0;
         int totalCommentCount = 0;
@@ -56,7 +55,7 @@ public class Main{
                 }
             }
 
-            if(videoList.size() == 0){
+            if(videoList.isEmpty()){
                 System.out.println("\u001B[31mVideo list is empty. Aborting program\u001B[0m");
                 try{
                     connection.close();

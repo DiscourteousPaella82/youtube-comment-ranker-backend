@@ -1,10 +1,10 @@
-package comment;
+package org.myapps.youtube.commentranker;
 
 import com.google.api.client.util.DateTime;
 
 /**
  * <a href="https://developers.google.com/youtube/v3/docs/comments">...</a>
- *
+ * Parsed YouTube Comment Data object. Contains the data from the snippet
  * @param authorDisplayName The display name of the user who posted the comment.
  * @param authorProfileImageURL The URL for the avatar of the user who posted the comment.
  * @param authorChannelUrl Gets channel url.

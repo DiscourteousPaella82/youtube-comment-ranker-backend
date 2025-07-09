@@ -1,4 +1,4 @@
-package thread;
+package org.myapps.youtube.commentranker;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,19 +8,32 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import com.google.api.services.youtube.YouTube;
 
-import comment.CommentClient;
-import comment.CommentThreadData;
-import video.Video;
+/**
+ * Handles threads & futures for fetching comment lists functionality.
+ */
+public class ThreadService {
 
-public class ThreadClient {
-
+    /**
+     * The number of comments returned from all threads
+     */
     private int commentCount;
+    /**
+     * The number of comment threads returned from all threads
+     */
     private int commentThreadCount;
+    /**
+     * The number of requests made to the API
+     */
     private int commentRequestCount;
 
+    /**
+     * Creates multiple threads to concurrently make requests and store CommentThreadData. Returns a list of CommentThreadData aggregated from all threads
+     * @param youTube YouTube object
+     * @param videoList List of Videos
+     * @return List of CommentThreadData
+     */
     public List<CommentThreadData> requestCommentThreadData(YouTube youTube,List<Video> videoList){
         commentCount = 0;
         commentRequestCount = 0;
@@ -35,7 +48,7 @@ public class ThreadClient {
 
         try{
             for(Video video:videoList){
-                callables.add(new CommentClient(youTube, video.id()));
+                callables.add(new CommentService(youTube, video.id()));
             }
 
             futureList = executor.invokeAll(callables);
@@ -72,14 +85,24 @@ public class ThreadClient {
 
         return commentThreadDataList;
     }
+
+    /**
+     * @return Count of comments fetched across all threads
+     */
     public int getCommentCount(){
         return commentCount;
     }
-    
+
+    /**
+     * @return Count of comment threads fetched across all threads
+     */
     public int getCommentThreadCount(){
         return commentThreadCount;
-    }    
-    
+    }
+
+    /**
+     * @return Count of requests made across all threads
+     */
     public int getCommentRequestCount(){
         return commentRequestCount;
     }

@@ -1,4 +1,4 @@
-package comment;
+package org.myapps.youtube.commentranker;
 
 import java.io.IOException;
 
@@ -9,22 +9,49 @@ import java.util.concurrent.Callable;
 import java.util.Date;
 
 import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.Comment;
 import com.google.api.services.youtube.model.CommentSnippet;
 import com.google.api.services.youtube.model.CommentThreadListResponse;
 
-public class CommentClient implements Callable<List<CommentThreadData>>{
+/**
+ * Contains functionality for fetching lists of CommentThreads
+ */
+public class CommentService implements Callable<List<CommentThreadData>>{
 
+    /**
+     * Google API key
+     */
     private static final String DEVELOPER_KEY = System.getenv("YOUTUBEDATAV3APIKEY");
+    /**
+     * Video ID which comments are being fetched from
+     */
     private String videoId;
+    /**
+     * YouTube object provides access to YouTube
+     */
     private final YouTube youTube;
 
-    public CommentClient(YouTube youTube, String videoId){
+    public CommentService(YouTube youTube, String videoId){
         this.youTube = youTube;
         this.videoId = videoId;
     }
 
-    private List<CommentThreadData> findCommentThreadByVideoId()
-        throws IOException {
+    /**
+     * Callable method for threads
+     * @return List of CommentThreadData
+     * @throws IOException
+     */
+    public List<CommentThreadData> call() throws IOException{
+        List<CommentThreadData> commentThreadDataList = null;
+        commentThreadDataList = findCommentThreadByVideoId();
+        return commentThreadDataList;
+    }
+
+    /**
+     * Gets a hardcoded amount of maximum amount comments(100 max) from video with videoId.
+     * @return List of CommentThreadData
+     */
+    private List<CommentThreadData> findCommentThreadByVideoId() {
         System.out.println("\u001B[36m" + new Date() + ":: Thread " + Thread.currentThread().getId() 
         + ": Attempting to get comment thread data for video with id: " + videoId + "\u001B[0m");
 
@@ -32,12 +59,12 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
         part.add("snippet");
         part.add("replies");
 
-        YouTube.CommentThreads.List request = youTube.commentThreads()
-            .list(part);
-
         List<CommentThreadData> commentThreadList = new ArrayList<>();
 
         try{
+            YouTube.CommentThreads.List request = youTube.commentThreads()
+                .list(part);
+
             CommentThreadListResponse response = request.setKey(DEVELOPER_KEY)
                 .setMaxResults(100L)
                 .setOrder("relevance")
@@ -85,6 +112,12 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
         return commentThreadList;
     }
 
+    /**
+     * Assigns top level comment data
+     * @param response Request response object
+     * @param index index of item in the response
+     * @return CommentData for the topLevelComment
+     */
     private CommentData getTopLevelCommentData(CommentThreadListResponse response, int index) {
         try{
             CommentSnippet topLevelCommentSnippet = response.getItems().get(index).getSnippet().getTopLevelComment().getSnippet();
@@ -107,11 +140,17 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
         return null;
     }
 
+    /**
+     * Assigns reply list
+     * @param response Request response object
+     * @param index index of item in the response
+     * @return List of CommentData
+     */
     private List<CommentData> getCommentRepliesData(CommentThreadListResponse response, int index) {
-        List<com.google.api.services.youtube.model.Comment> replies = response.getItems().get(index).getReplies().getComments();
+        List<Comment> replies = response.getItems().get(index).getReplies().getComments();
         List<CommentData> repliesList = new ArrayList<>();
         
-        for (com.google.api.services.youtube.model.Comment reply : replies) {
+        for (Comment reply : replies) {
             try{
             CommentSnippet replySnippet = reply.getSnippet();
             repliesList.add(
@@ -134,17 +173,5 @@ public class CommentClient implements Callable<List<CommentThreadData>>{
         }
         
         return (!replies.isEmpty()) ? repliesList : Collections.emptyList();
-    }
-
-    public List<CommentThreadData> call() throws IOException{
-        List<CommentThreadData> commentThreadDataList = null;
-        try{
-            commentThreadDataList = findCommentThreadByVideoId();
-        } catch (IOException e){
-            e.printStackTrace();
-            System.out.println("\u001B[31m " + new Date() + " ::Thread " + Thread.currentThread().getId() 
-                + ":IO Exception thrown\tVideo Id: " + videoId + "\u001B[0m");
-        }
-        return commentThreadDataList;
     }
 }

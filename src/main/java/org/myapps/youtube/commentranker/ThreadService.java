@@ -48,7 +48,7 @@ public class ThreadService {
 
         try{
             for(Video video:videoList){
-                callables.add(new ThreadService(youTube, video.id()));
+                callables.add(new CommentService(youTube, video.id()));
             }
 
             futureList = executor.invokeAll(callables);

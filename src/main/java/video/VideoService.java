@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * Has functionality for returning Lists of Videos
  */
-public class VideoClient {
+public class VideoService {
     /**
      * Google API key
      */
@@ -33,7 +33,7 @@ public class VideoClient {
      */
     private int requestCount;
     
-    public VideoClient(YouTube youtube){
+    public VideoService(YouTube youtube){
         this.youtube = youtube;
         nextPageToken = null;
     }
@@ -92,6 +92,20 @@ public class VideoClient {
     }
 
     /**
+     * @return Count of requests made
+     */
+    public int getRequestCount(){
+        return requestCount;
+    }
+
+    /**
+     * @return Next page token
+     */
+    public String getNextPageToken(){
+        return nextPageToken;
+    }
+
+    /**
      * Assignment function for Video List from response
      * @param response Video GET response
      * @return
@@ -120,19 +134,5 @@ public class VideoClient {
             }
         }
         return videoList;
-    }
-
-    /**
-     * @return Count of requests made
-     */
-    public int getRequestCount(){
-        return requestCount;
-    }
-
-    /**
-     * @return Next page token
-     */
-    public String getNextPageToken(){
-        return nextPageToken;
     }
 }

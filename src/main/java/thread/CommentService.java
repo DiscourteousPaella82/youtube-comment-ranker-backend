@@ -8,17 +8,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import com.google.api.services.youtube.YouTube;
 
-import comment.CommentClient;
+import comment.CommentService;
 import comment.CommentThreadData;
 import video.Video;
 
 /**
  * Handles threads & futures for fetching comment lists functionality.
  */
-public class ThreadClient {
+public class CommentService {
 
     /**
      * The number of comments returned from all threads
@@ -53,7 +52,7 @@ public class ThreadClient {
 
         try{
             for(Video video:videoList){
-                callables.add(new CommentClient(youTube, video.id()));
+                callables.add(new CommentService(youTube, video.id()));
             }
 
             futureList = executor.invokeAll(callables);

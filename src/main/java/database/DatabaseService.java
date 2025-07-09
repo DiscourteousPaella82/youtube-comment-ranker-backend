@@ -14,9 +14,9 @@ import comment.CommentThreadData;
 /**
  * Provides functionality for interacting with a local PostGreSQL database
  */
-public class DatabaseFunctions {
+public class DatabaseService {
     /**
-     * Row insetion count
+     * Row insertion count
      */
     private int numberInsertions;
 
@@ -53,7 +53,7 @@ public class DatabaseFunctions {
      * Creates comment table if it doesn't exist
      * @param connection
      */
-    public void createTable(Connection connection){
+    public void createCommentTable(Connection connection){
         Statement statement;
         String query="CREATE TABLE IF NOT EXISTS comments(id SERIAL,"
             + "authorDisplayName VARCHAR(100),authorProfileImageURL VARCHAR(150),authorChannelUrl VARCHAR(200),"

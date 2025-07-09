@@ -1,4 +1,4 @@
-package comment;
+package org.myapps.youtube.commentranker;
 
 import java.io.IOException;
 

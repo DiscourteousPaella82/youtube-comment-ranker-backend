@@ -1,4 +1,4 @@
-package thread;
+package org.myapps.youtube.commentranker;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,14 +10,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import com.google.api.services.youtube.YouTube;
 
-import comment.CommentService;
-import comment.CommentThreadData;
-import video.Video;
-
 /**
  * Handles threads & futures for fetching comment lists functionality.
  */
-public class CommentService {
+public class ThreadService {
 
     /**
      * The number of comments returned from all threads
@@ -52,7 +48,7 @@ public class CommentService {
 
         try{
             for(Video video:videoList){
-                callables.add(new CommentService(youTube, video.id()));
+                callables.add(new ThreadService(youTube, video.id()));
             }
 
             futureList = executor.invokeAll(callables);

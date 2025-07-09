@@ -1,4 +1,4 @@
-package database;
+package org.myapps.youtube.commentranker;
 
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
@@ -7,9 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-
-import comment.CommentData;
-import comment.CommentThreadData;
 
 /**
  * Provides functionality for interacting with a local PostGreSQL database

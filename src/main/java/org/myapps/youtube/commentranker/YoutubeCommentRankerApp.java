@@ -1,4 +1,4 @@
-package org.example;
+package org.myapps.youtube.commentranker;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -10,23 +10,16 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import comment.CommentThreadData;
-import database.DatabaseService;
-import thread.CommentService;
-import video.Video;
-import video.VideoService;
-import youtube.YoutubeClient;
-
 import com.google.api.services.youtube.YouTube;
 
 /**
  * Main program method
  */
-public class Main{
-    private static Logger logger = LoggerFactory.getLogger(Main.class);
+public class YoutubeCommentRankerApp{
+    private static Logger logger = LoggerFactory.getLogger(YoutubeCommentRankerApp.class);
 
     public static void main(String[] args) throws GeneralSecurityException, IOException {
-        YouTube youTube = YoutubeClient.getService();
+        YouTube youTube = YoutubeService.getService();
         DatabaseService databaseFunctions = new DatabaseService();
         System.out.println("Hello");
 
@@ -75,7 +68,7 @@ public class Main{
                 System.exit(1);
             }
 
-            CommentService threadClient = new CommentService();
+            ThreadService threadClient = new ThreadService();
             List<CommentThreadData> commentThreadData = threadClient.requestCommentThreadData(youTube, videoList);  //Fetches CommentData via the ThreadClient
             totalRequestCount += threadClient.getCommentRequestCount();
             remainingQuota -= threadClient.getCommentRequestCount();

@@ -1,4 +1,4 @@
-package youtube;
+package org.myapps.youtube.commentranker;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -11,7 +11,7 @@ import com.google.api.services.youtube.YouTube;
 /**
  * Used to build YouTube object
  */
-public final class YoutubeClient {
+public final class YoutubeService {
     private static final String APPLICATION_NAME = "COMMENT FETCH APP";
     private static final GsonFactory GSON_FACTORY = GsonFactory.getDefaultInstance();
 

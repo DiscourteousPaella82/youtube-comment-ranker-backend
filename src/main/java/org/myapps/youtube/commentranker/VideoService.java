@@ -1,4 +1,4 @@
-package video;
+package org.myapps.youtube.commentranker;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.VideoListResponse;

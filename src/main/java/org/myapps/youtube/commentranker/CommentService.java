@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.Callable;
-import java.util.Date;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.Comment;

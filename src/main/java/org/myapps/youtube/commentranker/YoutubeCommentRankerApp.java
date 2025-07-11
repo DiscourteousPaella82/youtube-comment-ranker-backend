@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -21,16 +20,6 @@ public class YoutubeCommentRankerApp{
     public static void main(String[] args) throws GeneralSecurityException, IOException {
         YouTube youTube = YoutubeService.getService();
         DatabaseService databaseFunctions = new DatabaseService();
-        System.out.println("Hello");
-
-        logger.debug("Debug log message");
-        logger.info("Info log message");
-        //logger.error("Error log message");
-        
-        String variable = "Hello John";
-        logger.debug("Printing variable value {} ", variable);
-
-        System.exit(1);
 
         String PORT = System.getenv("DATABASE_PORT");
         
@@ -89,15 +78,15 @@ public class YoutubeCommentRankerApp{
         long finish = System.currentTimeMillis();
         long timeElapsed = finish - start;
 
-        logger.debug("\u001B[32m" + new Date() +" Finished fetching comments:\nTotal number of requests made: " + totalRequestCount + "\nTotal number of comments returned: " 
+        logger.info("Finished fetching comments:\nTotal number of requests made: " + totalRequestCount + "\nTotal number of comments returned: " 
             + totalCommentCount + "\nTotal number of rows inserted: " + totalRowsInserted + "\nNumber of lost comments: " + (totalCommentCount - totalRowsInserted) + "\nTime taken: " 
-            + timeElapsed + "ms\nFinal page token: " + videoClient.getNextPageToken() + "\u001B[0m");
+            + timeElapsed + "ms\nFinal page token: " + videoClient.getNextPageToken());
             
         try{
             connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            logger.error("\u001B[31mError closing connection\u001B[0m");
+            logger.error("Error closing connection");
             System.exit(1);
         }
         System.exit(0);

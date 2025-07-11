@@ -13,10 +13,14 @@ import com.google.api.services.youtube.model.Comment;
 import com.google.api.services.youtube.model.CommentSnippet;
 import com.google.api.services.youtube.model.CommentThreadListResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Contains functionality for fetching lists of CommentThreads
  */
 public class CommentService implements Callable<List<CommentThreadData>>{
+    private static Logger logger = LoggerFactory.getLogger(CommentService.class);
 
     /**
      * Google API key
@@ -52,8 +56,8 @@ public class CommentService implements Callable<List<CommentThreadData>>{
      * @return List of CommentThreadData
      */
     private List<CommentThreadData> findCommentThreadByVideoId() {
-        System.out.println("\u001B[36m" + new Date() + ":: Thread " + Thread.currentThread().getId() 
-        + ": Attempting to get comment thread data for video with id: " + videoId + "\u001B[0m");
+        logger.debug("Thread " + Thread.currentThread().getId() 
+        + ": Attempting to get comment thread data for video with id: " + videoId);
 
         List<String> part = new ArrayList<>();
         part.add("snippet");
@@ -97,17 +101,15 @@ public class CommentService implements Callable<List<CommentThreadData>>{
                     if(response.getItems().get(i).getSnippet().getTotalReplyCount() != 0L)
                         repliesList = getCommentRepliesData(response, i);
                 } catch (Exception e){
-                    System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 
-                    + ":Error reading replies\u001B[0m");
+                    logger.error("Thread " + Thread.currentThread().getId() 
+                    + ":Error reading replies");
                 }
 
                 commentThreadList.add(new CommentThreadData(topLevelComment, repliesList));
-
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 
-                + ":Error adding comment to list\u001B[0m");
+            logger.error("Thread " + Thread.currentThread().getId() + ":Error adding comment to list");
         }
         return commentThreadList;
     }
@@ -134,8 +136,7 @@ public class CommentService implements Callable<List<CommentThreadData>>{
             );
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 
-                + ":Error adding top level comment to list\u001B[0m");
+            logger.error("Thread " + Thread.currentThread().getId() + ":Error adding top level comment to list");
         }
         return null;
     }
@@ -167,8 +168,8 @@ public class CommentService implements Callable<List<CommentThreadData>>{
         
             } catch (Exception e){
             e.printStackTrace();
-            System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 
-                + ":Error adding comment reply to list\u001B[0m");
+            logger.error("Thread " + Thread.currentThread().getId() 
+                + ":Error adding comment reply to list");
             }
         }
         

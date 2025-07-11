@@ -8,10 +8,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Provides functionality for interacting with a local PostGreSQL database
  */
 public class DatabaseService {
+    private static Logger logger = LoggerFactory.getLogger(DatabaseService.class);
     /**
      * Row insertion count
      */
@@ -30,16 +34,17 @@ public class DatabaseService {
 
         try{
             Class.forName("org.postgresql.Driver");
-            System.out.println("Port: " + port + "\nUsername: " + username + "\nPassword: " + password);
+            logger.debug("Attempting to create connection with database");
             connection = DriverManager.getConnection("jdbc:postgresql://localhost:" + port + "/" + dbname,username,password);
             if(connection!= null){
-                System.out.println("\u001B[32mConnection established!\u001B[0m");
+                logger.info("Connection established");
             }
             else{
-                System.out.println("\u001B[31mDatabase error:Failed to connect to database\u001B[0m");
+                logger.error("Database error:Failed to connect to database");
                 System.exit(1);
             }
         } catch (Exception e) {
+            logger.error("Error thrown attempting to create database connection");
             e.printStackTrace();
             throw new RuntimeException(e);
         }
@@ -58,9 +63,9 @@ public class DatabaseService {
         try {            
             statement = connection.createStatement();
             statement.executeUpdate(query);
-            System.out.println("\u001B[32mTable comments created or already exists\u001B[0m");
+            logger.info("Table comments created or already exists");
         } catch (Exception e) {
-            System.out.println("\u001B[31mDatabase error: failed to create new table\u001B[0m");
+            logger.error("Database error: failed to create new table");
             e.printStackTrace();
             throw new RuntimeException(e);
         }
@@ -121,12 +126,12 @@ public class DatabaseService {
                     break;
                 } catch (BatchUpdateException e) {
                     if(attempts > 2){
-                        System.out.println("\u001B[31mFailed to add batch within allowed attempt count. Skipping batch\u001B[0m");
+                        logger.warn("Failed to add batch within allowed attempt count. Skipping batch");
                         e.printStackTrace();
                         break;
                     }
                     attempts++;
-                    System.out.println("\u001B[31mError executing batch insert to database. Attempts remaining: " + (3-attempts) + "\u001B[0m");
+                    logger.warn("Error executing batch insert to database. Attempts remaining: " + (3-attempts));
                     e.printStackTrace();
                 }
             }
@@ -135,11 +140,11 @@ public class DatabaseService {
         try{
             preparedStatement.executeBatch();
         } catch (BatchUpdateException e) {
-            System.out.println("\u001B[31mError executing batch insert to database\u001B[0m");
+            logger.error("Error executing batch insert to database");
             e.printStackTrace();
         }
 
-        System.out.println("\u001B[32m" + numberInsertions + " rows added!\u001B[0m");
+        logger.debug(numberInsertions + " rows added!");
     }
 
     /**

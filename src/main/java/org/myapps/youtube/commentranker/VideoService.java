@@ -12,10 +12,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Has functionality for returning Lists of Videos
  */
 public class VideoService {
+    private static Logger logger = LoggerFactory.getLogger(VideoService.class);
     /**
      * Google API key
      */
@@ -53,7 +57,7 @@ public class VideoService {
         VideoListResponse response;
         
         int attempts = 0;
-        System.out.println("\u001B[36m" + new Date() + "Attempting to get video list with nextPageToken: " + nextPageToken + "\u001B[0m");
+        logger.debug("Attempting to get video list with nextPageToken: " + nextPageToken);
         while(true){
             try{
                 requestCount++;
@@ -74,13 +78,13 @@ public class VideoService {
                 break;
             } catch (IOException e) {
                 if(attempts > 2){
-                    System.out.println("\u001B[31mCritical Error executing trying to fetch videos. Exiting program\n");
+                    logger.error("Critical Error executing trying to fetch videos. Exiting program\n");
                     e.printStackTrace();
                     System.exit(1);
                 }
                 attempts++;
                 e.printStackTrace();
-                System.out.println("\u001B[31mError executing trying to fetch videos.\nAttempts remaining: " + (3-attempts) + "\u001B[0m");
+                logger.warn("Error executing trying to fetch videos.\nAttempts remaining: " + (3-attempts));
             }
         }
         nextPageToken = response.getNextPageToken();
@@ -130,7 +134,7 @@ public class VideoService {
             }
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("\u001B[31mError adding video to list\u001B[0m");
+                logger.error("Error adding video to list");
             }
         }
         return videoList;

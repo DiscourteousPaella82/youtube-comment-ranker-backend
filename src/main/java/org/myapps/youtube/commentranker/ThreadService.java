@@ -10,10 +10,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import com.google.api.services.youtube.YouTube;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Handles threads & futures for fetching comment lists functionality.
  */
 public class ThreadService {
+    private static Logger logger = LoggerFactory.getLogger(ThreadService.class);
 
     /**
      * The number of comments returned from all threads
@@ -57,14 +61,15 @@ public class ThreadService {
             for(Future<List<CommentThreadData>> future : futureList){
                 try {
                     commentThreadDataList.addAll(future.get());
-                    System.out.println("\u001B[33m" + new Date() + ":: Comment thread added to comment list\u001B[0m");
+                    logger.debug("Comment thread added to CommentThreadData list");
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
-                    System.out.println("\u001B[31m " + new Date() + ":: Thread " + Thread.currentThread().getId() 
+                    logger.error("Thread " + Thread.currentThread().getId() 
                         + ":Error adding comment thread to list\u001B[0m");
                 }
             }
         } catch (InterruptedException e) {
+            logger.error("Thread error caught");
             e.printStackTrace();
         }
 
@@ -79,7 +84,7 @@ public class ThreadService {
             commentCount += commentThreadData.commentReplies().size();
         }
 
-        System.out.println("\u001B[34mNumber of comment requests made: " + commentRequestCount 
+        logger.info("\u001B[34mNumber of comment requests made: " + commentRequestCount 
             + "\nNumber of commentThreads received: " + commentThreadCount + "\nNumber of comments received: " 
             + commentCount + "\nTime taken: " + timeElapsed + "ms \u001B[0m");
 

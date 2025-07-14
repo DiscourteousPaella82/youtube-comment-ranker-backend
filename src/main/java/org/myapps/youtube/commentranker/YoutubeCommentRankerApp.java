@@ -29,6 +29,22 @@ public class YoutubeCommentRankerApp{
         
         String DBPASSWORD = System.getenv("DATABASE_PASSWORD");
 
+        String RQ = System.getenv("QUOTA_REMAINING");
+
+        if(PORT.isEmpty() || DBNAME.isEmpty() || DBNAME.isEmpty() || DBPASSWORD.isEmpty() || RQ.isEmpty() ){
+            logger.error("Error invalid environment variables");
+            System.exit(1);
+        }
+
+        int remainingQuota = 0;
+
+        try {    
+            remainingQuota = Integer.parseInt(RQ);
+        } catch (Exception e) {
+            logger.error("Error parsing remaining quota", e);
+        }
+
+
         Connection connection = databaseFunctions.connectionToDb(PORT, DBNAME, DBUSER, DBPASSWORD); //creates connection to the database
         databaseFunctions.createCommentTable(connection);  //creates table if it doesn't exist already
 
@@ -38,7 +54,6 @@ public class YoutubeCommentRankerApp{
         int totalRequestCount = 0;
         int totalCommentCount = 0;
         int totalRowsInserted = 0;
-        int remainingQuota = 20;
 
         long start = System.currentTimeMillis();
 

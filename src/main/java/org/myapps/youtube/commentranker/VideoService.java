@@ -89,7 +89,7 @@ public class VideoService {
         nextPageToken = response.getNextPageToken();
         List<Video> videoList = getVideos(response);
 
-        System.out.println(response);
+        logger.debug("Video list response for {}",response);
 
         return videoList;
     }

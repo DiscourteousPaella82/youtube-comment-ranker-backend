@@ -42,6 +42,7 @@ public class YoutubeCommentRankerApp{
             remainingQuota = Integer.parseInt(RQ);
         } catch (Exception e) {
             logger.error("Error parsing remaining quota", e);
+            System.exit(1);
         }
 
 

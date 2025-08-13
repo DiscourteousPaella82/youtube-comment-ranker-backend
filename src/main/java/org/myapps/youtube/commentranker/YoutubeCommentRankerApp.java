@@ -21,9 +21,9 @@ public class YoutubeCommentRankerApp{
         YouTube youTube = YoutubeService.getService();
         DatabaseService databaseFunctions = new DatabaseService();
 
-        String PORT = System.getenv("DATABASE_PORT");        
+        String PORT = System.getenv("DATABASE_PORT");
         String DBNAME = System.getenv("DATABASE_NAME");
-        String DBUSER = System.getenv("DATABASE_USER");        
+        String DBUSER = System.getenv("DATABASE_USER");
         String DBPASSWORD = System.getenv("DATABASE_PASSWORD");
         String RQ = System.getenv("QUOTA_REMAINING");
 
@@ -31,8 +31,6 @@ public class YoutubeCommentRankerApp{
             logger.error("Error invalid environment variables");
             System.exit(1);
         }
-
-        System.out.print("PORT: " + PORT + "\nNAME: " + DBNAME + "\nUSER: " + DBUSER + "\nPASSWORD: " + DBPASSWORD + "\nRQ: " + RQ + "\n\n");
 
         int remainingQuota = 0;
 

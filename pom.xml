@@ -21,7 +21,7 @@
             <configuration>
                 <archive>
                 <manifest>
-                    <mainClass>fully.qualified.MainClass</mainClass>
+                    <mainClass>org.myapps.youtube.commentranker.YoutubeCommentRankerApp</mainClass>
                 </manifest>
                 </archive>
                 <descriptorRefs>

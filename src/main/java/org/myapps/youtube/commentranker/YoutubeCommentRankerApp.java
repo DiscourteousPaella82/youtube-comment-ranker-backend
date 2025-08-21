@@ -34,7 +34,7 @@ public class YoutubeCommentRankerApp{
 
         int remainingQuota = 0;
 
-        try {    
+        try {
             remainingQuota = Integer.parseInt(RQ);
         } catch (Exception e) {
             logger.error("Error parsing remaining quota", e);
@@ -91,7 +91,8 @@ public class YoutubeCommentRankerApp{
         logger.info("Finished fetching comments:\nTotal number of requests made: " + totalRequestCount + "\nTotal number of comments returned: " 
             + totalCommentCount + "\nTotal number of rows inserted: " + totalRowsInserted + "\nNumber of lost comments: " + (totalCommentCount - totalRowsInserted) + "\nTime taken: " 
             + timeElapsed + "ms\nFinal page token: " + videoClient.getNextPageToken());
-            
+        
+        System.out.println("commentsFetched=" + totalCommentCount);
         try{
             connection.close();
         } catch (SQLException e) {
@@ -99,6 +100,7 @@ public class YoutubeCommentRankerApp{
             logger.error("Error closing connection");
             System.exit(1);
         }
+
         System.exit(0);
     }
 }

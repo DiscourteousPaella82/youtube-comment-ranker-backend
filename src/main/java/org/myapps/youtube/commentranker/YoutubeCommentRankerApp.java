@@ -18,7 +18,7 @@ public class YoutubeCommentRankerApp{
     private static Logger logger = LoggerFactory.getLogger(YoutubeCommentRankerApp.class);
 
     public static void main(String[] args) throws GeneralSecurityException, IOException {
-        YouTube youTube = YoutubeService.getService();
+	YouTube youTube = YoutubeService.getService();
         DatabaseService databaseFunctions = new DatabaseService();
 
         String PORT = System.getenv("DATABASE_PORT");
@@ -92,7 +92,7 @@ public class YoutubeCommentRankerApp{
             + totalCommentCount + "\nTotal number of rows inserted: " + totalRowsInserted + "\nNumber of lost comments: " + (totalCommentCount - totalRowsInserted) + "\nTime taken: " 
             + timeElapsed + "ms\nFinal page token: " + videoClient.getNextPageToken());
         
-        System.out.println("commentsFetched=" + totalCommentCount);
+        System.out.println("export commentsFetched=" + totalCommentCount);
         try{
             connection.close();
         } catch (SQLException e) {

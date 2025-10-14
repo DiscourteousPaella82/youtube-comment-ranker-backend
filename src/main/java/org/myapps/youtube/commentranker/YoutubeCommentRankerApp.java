@@ -15,10 +15,10 @@ import com.google.api.services.youtube.YouTube;
  * Main program method
  */
 public class YoutubeCommentRankerApp{
-    private static Logger logger = LoggerFactory.getLogger(YoutubeCommentRankerApp.class);
+    private final static Logger logger = LoggerFactory.getLogger(YoutubeCommentRankerApp.class);
 
     public static void main(String[] args) throws GeneralSecurityException, IOException {
-	YouTube youTube = YoutubeService.getService();
+    	YouTube youTube = YoutubeService.getService();
         DatabaseService databaseFunctions = new DatabaseService();
 
         String PORT = System.getenv("DATABASE_PORT");
@@ -36,7 +36,7 @@ public class YoutubeCommentRankerApp{
 
         try {
             remainingQuota = Integer.parseInt(RQ);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             logger.error("Error parsing remaining quota", e);
             System.exit(1);
         }
@@ -92,12 +92,12 @@ public class YoutubeCommentRankerApp{
             + totalCommentCount + "\nTotal number of rows inserted: " + totalRowsInserted + "\nNumber of lost comments: " + (totalCommentCount - totalRowsInserted) + "\nTime taken: " 
             + timeElapsed + "ms\nFinal page token: " + videoClient.getNextPageToken());
         
-        System.out.println("export commentsFetched=" + totalCommentCount);
+        System.out.println("commentsFetched=" + totalCommentCount + "\n" + "requestsMade=" + totalRequestCount);
+        
         try{
             connection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
-            logger.error("Error closing connection");
+            logger.error("Error closing connection: ", e);
             System.exit(1);
         }
 

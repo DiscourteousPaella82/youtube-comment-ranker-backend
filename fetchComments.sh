@@ -45,12 +45,13 @@ TMPFILE=$(mktemp)
 echo "Temporary file: $TMPFILE"
 
 until [ $remainingQuota -lt 1 ]; do
-  echo "Remaining quota is $remainingQuota"
-  java -cp ./target/YoutubeCommentFetchApplication-1.0-SNAPSHOT-jar-with-dependencies.jar org.myapps.youtube.commentranker.YoutubeCommentRankerApp > $TMPFILE
-  source $TMPFILE
-  totalCommentsFetched=$(( $totalCommentsFetched + ${commentsFetched} ))
-#  echo "Number of comments fetched thus far is $totalCommentsFetched"
-  ((remainingQuota--))
+	echo "Remaining quota is $remainingQuota"
+	java -cp ./target/YoutubeCommentFetchApplication-1.0-SNAPSHOT-jar-with-dependencies.jar org.myapps.youtube.commentranker.YoutubeCommentRankerApp > $TMPFILE
+	commentsFetched=$(awk '/commentsFetched=/{print}' $TMPFILE | cut -d '=' -f 2)
+	requestsMade=$(awk '/requestsMade=/{print}' $TMPFILE | cut -d '=' -f 2)
+	totalCommentsFetched=$(( $totalCommentsFetched + ${commentsFetched} ))
+	remainingQuota=$(( $remainingQuota - ${requestsMade} - 1 ))
 done
 
 echo "Quota expended, total comments fetched $totalCommentsFetched"
+export QUOTA_REMAINING=${remainingQuota}

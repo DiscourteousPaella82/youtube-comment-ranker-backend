@@ -7,10 +7,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import com.google.api.services.youtube.YouTube;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.api.services.youtube.YouTube;
 
 /**
  * Handles threads & futures for fetching comment lists functionality.
